@@ -1,0 +1,64 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Home, BarChart3, Plus, ListOrdered, Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { AddTransactionSheet } from "./add-transaction-sheet";
+
+export function BottomNav() {
+    const pathname = usePathname();
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+    const navItems = [
+        { href: "/", icon: Home, label: "Home" },
+        { href: "/stats", icon: BarChart3, label: "Stats" },
+        { href: "#", icon: Plus, label: "Add", isButton: true },
+        { href: "/transactions", icon: ListOrdered, label: "History" },
+        { href: "/settings", icon: Settings, label: "Settings" },
+    ];
+
+    return (
+        <>
+            <nav className="fixed bottom-0 left-0 right-0 z-50 glass bg-card/80 border-t border-border safe-area-inset-bottom">
+                <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+                    {navItems.map((item) => {
+                        if (item.isButton) {
+                            return (
+                                <button
+                                    key={item.label}
+                                    onClick={() => setIsSheetOpen(true)}
+                                    className="relative -mt-8"
+                                >
+                                    {/* Pulse ring effect */}
+                                    <div className="absolute inset-0 rounded-full bg-primary/30 pulse-ring" />
+                                    <div className="relative flex items-center justify-center w-16 h-16 rounded-full gradient-primary shadow-lg shadow-primary/30 active:scale-95 transition-transform">
+                                        <Plus className="w-7 h-7 text-primary-foreground" />
+                                    </div>
+                                </button>
+                            );
+                        }
+
+                        const isActive = pathname === item.href;
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={cn(
+                                    "flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors",
+                                    isActive ? "text-primary" : "text-muted-foreground"
+                                )}
+                            >
+                                <item.icon className="w-6 h-6" />
+                                <span className="text-xs font-medium">{item.label}</span>
+                            </Link>
+                        );
+                    })}
+                </div>
+            </nav>
+
+            <AddTransactionSheet open={isSheetOpen} onOpenChange={setIsSheetOpen} />
+        </>
+    );
+}
