@@ -129,7 +129,7 @@ export function Dashboard() {
                         <ChevronRight className="w-4 h-4" />
                     </Link>
                 </div>
-                <TransactionList transactions={transactions} limit={5} />
+                <TransactionList transactions={transactions} limit={5} showDeleteButton={false} />
             </div>
         </main>
     );

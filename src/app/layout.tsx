@@ -43,12 +43,15 @@ export default function RootLayout({
       <head>
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
       <body
-        className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-screen pb-24`}
+        className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-screen pb-24 pt-safe`}
       >
         <NotificationProvider />
-        {children}
+        <div className="pt-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' }}>
+          {children}
+        </div>
         <BottomNav />
       </body>
     </html>
