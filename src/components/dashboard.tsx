@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { StatCard } from "./stat-card";
+import { DailyBudgetCard } from "./daily-budget-card";
 import { CategoryChart } from "./category-chart";
 import { MonthlyChart } from "./monthly-chart";
 import { TransactionList } from "./transaction-list";
@@ -66,7 +67,7 @@ export function Dashboard() {
     }
 
     return (
-        <main className="min-h-screen px-4 pt-6 pb-24">
+        <main className="min-h-screen px-4 pt-2 pb-24">
             {/* Encabezado */}
             <header className="flex items-center justify-between mb-6">
                 <div>
@@ -93,7 +94,7 @@ export function Dashboard() {
             </header>
 
             {/* Tarjetas de Resumen */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-2 gap-3 mb-4">
                 <StatCard
                     title="Balance Actual"
                     value={monthlyStats.balance}
@@ -108,6 +109,15 @@ export function Dashboard() {
                     title="Gastos"
                     value={monthlyStats.expenses}
                     type="expense"
+                />
+            </div>
+
+            {/* Tarjeta de Presupuesto Diario */}
+            <div className="mb-6">
+                <DailyBudgetCard
+                    balance={monthlyStats.balance}
+                    income={monthlyStats.income}
+                    expenses={monthlyStats.expenses}
                 />
             </div>
 

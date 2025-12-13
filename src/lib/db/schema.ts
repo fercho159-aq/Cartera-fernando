@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, decimal, text, timestamp, boolean, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, decimal, timestamp, boolean, pgEnum } from 'drizzle-orm/pg-core';
 
 // Enums
 export const transactionTypeEnum = pgEnum('transaction_type', ['income', 'expense']);
@@ -31,6 +31,20 @@ export const transactions = pgTable('transactions', {
   parentId: serial('parent_id'),
 });
 
+// Debts/Debtors table - Para manejar personas que te deben dinero
+export const debts = pgTable('debts', {
+  id: serial('id').primaryKey(),
+  personName: varchar('person_name', { length: 255 }).notNull(),
+  amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
+  description: varchar('description', { length: 500 }),
+  isPaid: boolean('is_paid').notNull().default(false),
+  dueDate: timestamp('due_date'),
+  paidDate: timestamp('paid_date'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 // Types
 export type Transaction = typeof transactions.$inferSelect;
 export type NewTransaction = typeof transactions.$inferInsert;
+export type Debt = typeof debts.$inferSelect;
+export type NewDebt = typeof debts.$inferInsert;

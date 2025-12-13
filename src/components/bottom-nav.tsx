@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, BarChart3, Plus, ListOrdered, Settings } from "lucide-react";
+import { Home, BarChart3, Plus, Users, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddTransactionSheet } from "./add-transaction-sheet";
 
@@ -13,9 +13,9 @@ export function BottomNav() {
 
     const navItems = [
         { href: "/", icon: Home, label: "Inicio" },
-        { href: "/stats", icon: BarChart3, label: "Estadísticas" },
+        { href: "/stats", icon: BarChart3, label: "Stats" },
         { href: "#", icon: Plus, label: "Agregar", isButton: true },
-        { href: "/transactions", icon: ListOrdered, label: "Historial" },
+        { href: "/debts", icon: Users, label: "Deudores" },
         { href: "/settings", icon: Settings, label: "Ajustes" },
     ];
 
