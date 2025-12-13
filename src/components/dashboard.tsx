@@ -46,7 +46,7 @@ export function Dashboard() {
                     setStats(statsData);
                 }
             } catch (error) {
-                console.error("Error fetching data:", error);
+                console.error("Error al cargar datos:", error);
             } finally {
                 setLoading(false);
             }
@@ -67,11 +67,11 @@ export function Dashboard() {
 
     return (
         <main className="min-h-screen px-4 pt-6 pb-24">
-            {/* Header */}
+            {/* Encabezado */}
             <header className="flex items-center justify-between mb-6">
                 <div>
-                    <p className="text-muted-foreground text-sm">Welcome back 👋</p>
-                    <h1 className="text-2xl font-bold mt-1">Your Finances</h1>
+                    <p className="text-muted-foreground text-sm">Bienvenido de nuevo 👋</p>
+                    <h1 className="text-2xl font-bold mt-1">Tus Finanzas</h1>
                 </div>
                 <button
                     className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
@@ -79,8 +79,8 @@ export function Dashboard() {
                         if ("Notification" in window) {
                             Notification.requestPermission().then((permission) => {
                                 if (permission === "granted") {
-                                    new Notification("🔔 Notifications Enabled!", {
-                                        body: "You'll receive daily reminders at 8 PM",
+                                    new Notification("🔔 ¡Notificaciones Activadas!", {
+                                        body: "Recibirás recordatorios diarios a las 8 PM",
                                         icon: "/icon-192x192.png",
                                     });
                                 }
@@ -92,40 +92,40 @@ export function Dashboard() {
                 </button>
             </header>
 
-            {/* Summary Cards */}
+            {/* Tarjetas de Resumen */}
             <div className="grid grid-cols-2 gap-3 mb-6">
                 <StatCard
-                    title="Current Balance"
+                    title="Balance Actual"
                     value={monthlyStats.balance}
                     type="balance"
                 />
                 <StatCard
-                    title="Income"
+                    title="Ingresos"
                     value={monthlyStats.income}
                     type="income"
                 />
                 <StatCard
-                    title="Expenses"
+                    title="Gastos"
                     value={monthlyStats.expenses}
                     type="expense"
                 />
             </div>
 
-            {/* Charts */}
+            {/* Gráficas */}
             <div className="space-y-4 mb-6">
                 <CategoryChart data={stats?.categoryData || []} />
                 <MonthlyChart data={stats?.monthlyData || []} />
             </div>
 
-            {/* Recent Transactions */}
+            {/* Transacciones Recientes */}
             <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold">Recent Transactions</h2>
+                    <h2 className="text-lg font-semibold">Transacciones Recientes</h2>
                     <Link
                         href="/transactions"
                         className="flex items-center gap-1 text-sm text-primary hover:underline"
                     >
-                        See all
+                        Ver todo
                         <ChevronRight className="w-4 h-4" />
                     </Link>
                 </div>

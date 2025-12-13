@@ -16,6 +16,19 @@ const categoryColors: Record<string, string> = {
     other: "#6b7280",
 };
 
+const categoryLabels: Record<string, string> = {
+    food: "Comida",
+    transport: "Transporte",
+    entertainment: "Entretenimiento",
+    health: "Salud",
+    shopping: "Compras",
+    utilities: "Servicios",
+    salary: "Salario",
+    freelance: "Freelance",
+    investment: "Inversión",
+    other: "Otro",
+};
+
 const categoryEmojis: Record<string, string> = {
     food: "🍔",
     transport: "🚗",
@@ -40,7 +53,7 @@ interface CategoryChartProps {
 
 export function CategoryChart({ data }: CategoryChartProps) {
     const chartData = data.map((item) => ({
-        name: item.category,
+        name: categoryLabels[item.category] || item.category,
         value: Number(item.total),
         color: categoryColors[item.category] || categoryColors.other,
         emoji: categoryEmojis[item.category] || categoryEmojis.other,
@@ -69,12 +82,12 @@ export function CategoryChart({ data }: CategoryChartProps) {
         return (
             <Card className="border-0 bg-card">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Expenses by Category</CardTitle>
+                    <CardTitle className="text-lg">Gastos por Categoría</CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center justify-center h-48">
                     <p className="text-muted-foreground text-center">
-                        No expenses this month.<br />
-                        Start tracking your spending!
+                        Sin gastos este mes.<br />
+                        ¡Empieza a registrar tus gastos!
                     </p>
                 </CardContent>
             </Card>
@@ -84,7 +97,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
     return (
         <Card className="border-0 bg-card">
             <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Expenses by Category</CardTitle>
+                <CardTitle className="text-lg">Gastos por Categoría</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="flex items-center gap-4">
@@ -129,7 +142,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
                         ))}
                         {chartData.length > 4 && (
                             <p className="text-xs text-muted-foreground">
-                                +{chartData.length - 4} more categories
+                                +{chartData.length - 4} categorías más
                             </p>
                         )}
                     </div>

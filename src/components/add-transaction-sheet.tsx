@@ -11,13 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import {
     ArrowDownLeft,
@@ -30,23 +23,23 @@ import { cn } from "@/lib/utils";
 import { useTransactionStore } from "@/lib/store";
 
 const categories = [
-    { value: "food", label: "🍔 Food", emoji: "🍔" },
-    { value: "transport", label: "🚗 Transport", emoji: "🚗" },
-    { value: "entertainment", label: "🎮 Entertainment", emoji: "🎮" },
-    { value: "health", label: "🏥 Health", emoji: "🏥" },
-    { value: "shopping", label: "🛍️ Shopping", emoji: "🛍️" },
-    { value: "utilities", label: "💡 Utilities", emoji: "💡" },
-    { value: "salary", label: "💰 Salary", emoji: "💰" },
+    { value: "food", label: "🍔 Comida", emoji: "🍔" },
+    { value: "transport", label: "🚗 Transporte", emoji: "🚗" },
+    { value: "entertainment", label: "🎮 Entretenimiento", emoji: "🎮" },
+    { value: "health", label: "🏥 Salud", emoji: "🏥" },
+    { value: "shopping", label: "🛍️ Compras", emoji: "🛍️" },
+    { value: "utilities", label: "💡 Servicios", emoji: "💡" },
+    { value: "salary", label: "💰 Salario", emoji: "💰" },
     { value: "freelance", label: "💻 Freelance", emoji: "💻" },
-    { value: "investment", label: "📈 Investment", emoji: "📈" },
-    { value: "other", label: "📦 Other", emoji: "📦" },
+    { value: "investment", label: "📈 Inversión", emoji: "📈" },
+    { value: "other", label: "📦 Otro", emoji: "📦" },
 ];
 
 const recurrenceOptions = [
-    { value: "none", label: "One-time" },
-    { value: "daily", label: "Daily" },
-    { value: "weekly", label: "Weekly" },
-    { value: "monthly", label: "Monthly" },
+    { value: "none", label: "Una vez" },
+    { value: "daily", label: "Diario" },
+    { value: "weekly", label: "Semanal" },
+    { value: "monthly", label: "Mensual" },
 ];
 
 interface AddTransactionSheetProps {
@@ -90,7 +83,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                 const newTransaction = await response.json();
                 addTransaction(newTransaction);
 
-                // Reset form
+                // Limpiar formulario
                 setAmount("");
                 setTitle("");
                 setCategory("other");
@@ -101,7 +94,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                 router.refresh();
             }
         } catch (error) {
-            console.error("Error adding transaction:", error);
+            console.error("Error al agregar transacción:", error);
         } finally {
             setIsLoading(false);
         }
@@ -111,11 +104,11 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
         <Sheet open={open} onOpenChange={onOpenChange}>
             <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl px-6 pb-8 overflow-y-auto">
                 <SheetHeader className="pb-4">
-                    <SheetTitle className="text-xl">Add Transaction</SheetTitle>
+                    <SheetTitle className="text-xl">Agregar Transacción</SheetTitle>
                 </SheetHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Type Toggle */}
+                    {/* Selector de Tipo */}
                     <div className="flex gap-2 p-1 bg-muted rounded-xl">
                         <button
                             type="button"
@@ -128,7 +121,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                             )}
                         >
                             <ArrowUpRight className="w-5 h-5" />
-                            Expense
+                            Gasto
                         </button>
                         <button
                             type="button"
@@ -141,13 +134,13 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                             )}
                         >
                             <ArrowDownLeft className="w-5 h-5" />
-                            Income
+                            Ingreso
                         </button>
                     </div>
 
-                    {/* Amount Input */}
+                    {/* Campo de Monto */}
                     <div className="space-y-2">
-                        <Label htmlFor="amount" className="text-muted-foreground">Amount</Label>
+                        <Label htmlFor="amount" className="text-muted-foreground">Monto</Label>
                         <div className="relative">
                             <span className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl text-muted-foreground">
                                 $
@@ -166,12 +159,12 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                         </div>
                     </div>
 
-                    {/* Title Input */}
+                    {/* Campo de Descripción */}
                     <div className="space-y-2">
-                        <Label htmlFor="title" className="text-muted-foreground">Description</Label>
+                        <Label htmlFor="title" className="text-muted-foreground">Descripción</Label>
                         <Input
                             id="title"
-                            placeholder="What was this for?"
+                            placeholder="¿En qué gastaste?"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             className="h-14 text-lg bg-muted border-0 rounded-xl"
@@ -179,9 +172,9 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                         />
                     </div>
 
-                    {/* Category Selection */}
+                    {/* Selección de Categoría */}
                     <div className="space-y-2">
-                        <Label className="text-muted-foreground">Category</Label>
+                        <Label className="text-muted-foreground">Categoría</Label>
                         <div className="grid grid-cols-5 gap-2">
                             {categories.slice(0, 10).map((cat) => (
                                 <button
@@ -197,18 +190,26 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                                 >
                                     <span className="text-2xl">{cat.emoji}</span>
                                     <span className="text-[10px] mt-1 truncate w-full text-center">
-                                        {cat.value}
+                                        {cat.value === "food" ? "comida" :
+                                            cat.value === "transport" ? "transp." :
+                                                cat.value === "entertainment" ? "entret." :
+                                                    cat.value === "health" ? "salud" :
+                                                        cat.value === "shopping" ? "compras" :
+                                                            cat.value === "utilities" ? "servic." :
+                                                                cat.value === "salary" ? "salario" :
+                                                                    cat.value === "freelance" ? "freelan." :
+                                                                        cat.value === "investment" ? "invers." : "otro"}
                                     </span>
                                 </button>
                             ))}
                         </div>
                     </div>
 
-                    {/* Date Selection */}
+                    {/* Selección de Fecha */}
                     <div className="space-y-2">
                         <Label htmlFor="date" className="text-muted-foreground flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
-                            Date
+                            Fecha
                         </Label>
                         <Input
                             id="date"
@@ -219,11 +220,11 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                         />
                     </div>
 
-                    {/* Recurrence Selection */}
+                    {/* Selección de Frecuencia */}
                     <div className="space-y-2">
                         <Label className="text-muted-foreground flex items-center gap-2">
                             <RefreshCw className="w-4 h-4" />
-                            Frequency
+                            Frecuencia
                         </Label>
                         <div className="flex gap-2 flex-wrap">
                             {recurrenceOptions.map((opt) => (
@@ -242,7 +243,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                         </div>
                     </div>
 
-                    {/* Submit Button */}
+                    {/* Botón de Enviar */}
                     <Button
                         type="submit"
                         disabled={isLoading || !amount || !title}
@@ -254,7 +255,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                         {isLoading ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
-                            `Add ${type === "income" ? "Income" : "Expense"}`
+                            `Agregar ${type === "income" ? "Ingreso" : "Gasto"}`
                         )}
                     </Button>
                 </form>

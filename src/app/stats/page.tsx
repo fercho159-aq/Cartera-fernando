@@ -33,7 +33,7 @@ export default function StatsPage() {
                     setStats(data);
                 }
             } catch (error) {
-                console.error("Error fetching stats:", error);
+                console.error("Error al cargar estadísticas:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -50,22 +50,35 @@ export default function StatsPage() {
         );
     }
 
-    // Calculate totals from monthly data
+    // Calcular totales de los datos mensuales
     const totalIncome = stats?.monthlyData.reduce((sum, m) => sum + Number(m.income), 0) || 0;
     const totalExpense = stats?.monthlyData.reduce((sum, m) => sum + Number(m.expense), 0) || 0;
     const totalSavings = totalIncome - totalExpense;
     const savingsRate = totalIncome > 0 ? ((totalSavings / totalIncome) * 100).toFixed(1) : "0";
 
+    const categoryLabels: Record<string, string> = {
+        food: "Comida",
+        transport: "Transporte",
+        entertainment: "Entretenimiento",
+        health: "Salud",
+        shopping: "Compras",
+        utilities: "Servicios",
+        salary: "Salario",
+        freelance: "Freelance",
+        investment: "Inversión",
+        other: "Otro",
+    };
+
     return (
         <main className="min-h-screen px-4 pt-6 pb-24">
             <header className="mb-6">
-                <h1 className="text-2xl font-bold">Statistics</h1>
+                <h1 className="text-2xl font-bold">Estadísticas</h1>
                 <p className="text-muted-foreground text-sm mt-1">
-                    Your financial overview for the last 6 months
+                    Tu resumen financiero de los últimos 6 meses
                 </p>
             </header>
 
-            {/* Summary Stats */}
+            {/* Estadísticas Resumen */}
             <div className="grid grid-cols-3 gap-3 mb-6">
                 <Card className="border-0 bg-card p-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -73,7 +86,7 @@ export default function StatsPage() {
                             <TrendingUp className="w-4 h-4 text-chart-1" />
                         </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">Total Income</p>
+                    <p className="text-xs text-muted-foreground">Total Ingresos</p>
                     <p className="text-lg font-bold text-chart-1">
                         ${totalIncome.toLocaleString()}
                     </p>
@@ -85,7 +98,7 @@ export default function StatsPage() {
                             <TrendingDown className="w-4 h-4 text-destructive" />
                         </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">Total Expenses</p>
+                    <p className="text-xs text-muted-foreground">Total Gastos</p>
                     <p className="text-lg font-bold text-destructive">
                         ${totalExpense.toLocaleString()}
                     </p>
@@ -97,20 +110,20 @@ export default function StatsPage() {
                             <PiggyBank className="w-4 h-4 text-primary" />
                         </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">Savings Rate</p>
+                    <p className="text-xs text-muted-foreground">Tasa Ahorro</p>
                     <p className="text-lg font-bold text-primary">{savingsRate}%</p>
                 </Card>
             </div>
 
-            {/* Charts */}
+            {/* Gráficas */}
             <div className="space-y-4">
                 <MonthlyChart data={stats?.monthlyData || []} />
                 <CategoryChart data={stats?.categoryData || []} />
 
-                {/* Insights Card */}
+                {/* Tarjeta de Insights */}
                 <Card className="border-0 bg-card">
                     <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">💡 Insights</CardTitle>
+                        <CardTitle className="text-lg">💡 Análisis</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         {stats?.categoryData && stats.categoryData.length > 0 ? (
@@ -118,11 +131,11 @@ export default function StatsPage() {
                                 <div className="flex items-start gap-3 p-3 rounded-xl bg-muted">
                                     <span className="text-2xl">📊</span>
                                     <div>
-                                        <p className="font-medium">Top Spending Category</p>
+                                        <p className="font-medium">Categoría con más gastos</p>
                                         <p className="text-sm text-muted-foreground">
-                                            Your highest expense category is{" "}
+                                            Tu mayor gasto es en{" "}
                                             <span className="font-medium capitalize">
-                                                {stats.categoryData.sort((a, b) => Number(b.total) - Number(a.total))[0]?.category}
+                                                {categoryLabels[stats.categoryData.sort((a, b) => Number(b.total) - Number(a.total))[0]?.category] || stats.categoryData[0]?.category}
                                             </span>
                                         </p>
                                     </div>
@@ -131,9 +144,9 @@ export default function StatsPage() {
                                     <div className="flex items-start gap-3 p-3 rounded-xl bg-chart-1/10">
                                         <span className="text-2xl">🎉</span>
                                         <div>
-                                            <p className="font-medium text-chart-1">Great job!</p>
+                                            <p className="font-medium text-chart-1">¡Excelente trabajo!</p>
                                             <p className="text-sm text-muted-foreground">
-                                                You&apos;ve saved ${totalSavings.toLocaleString()} over the past 6 months
+                                                Has ahorrado ${totalSavings.toLocaleString()} en los últimos 6 meses
                                             </p>
                                         </div>
                                     </div>
@@ -141,9 +154,9 @@ export default function StatsPage() {
                                     <div className="flex items-start gap-3 p-3 rounded-xl bg-destructive/10">
                                         <span className="text-2xl">⚠️</span>
                                         <div>
-                                            <p className="font-medium text-destructive">Watch out!</p>
+                                            <p className="font-medium text-destructive">¡Cuidado!</p>
                                             <p className="text-sm text-muted-foreground">
-                                                You&apos;re spending more than you earn. Consider cutting back on expenses.
+                                                Estás gastando más de lo que ganas. Considera reducir gastos.
                                             </p>
                                         </div>
                                     </div>
@@ -151,7 +164,7 @@ export default function StatsPage() {
                             </>
                         ) : (
                             <p className="text-muted-foreground text-center py-4">
-                                Add some transactions to see your insights!
+                                ¡Agrega transacciones para ver tu análisis!
                             </p>
                         )}
                     </CardContent>

@@ -22,12 +22,12 @@ export default function SettingsPage() {
     const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
 
     useEffect(() => {
-        // Check notification permission
+        // Verificar permisos de notificación
         if ("Notification" in window) {
             setNotificationPermission(Notification.permission);
         }
 
-        // Check if app is installable
+        // Verificar si la app es instalable
         const handleBeforeInstallPrompt = (e: Event) => {
             e.preventDefault();
             setDeferredPrompt(e);
@@ -47,8 +47,8 @@ export default function SettingsPage() {
             setNotificationPermission(permission);
 
             if (permission === "granted") {
-                new Notification("🔔 Notifications Enabled!", {
-                    body: "You'll receive daily reminders at 8 PM",
+                new Notification("🔔 ¡Notificaciones Activadas!", {
+                    body: "Recibirás recordatorios diarios a las 8 PM",
                     icon: "/icon-192x192.png",
                 });
             }
@@ -71,14 +71,14 @@ export default function SettingsPage() {
     return (
         <main className="min-h-screen px-4 pt-6 pb-24">
             <header className="mb-6">
-                <h1 className="text-2xl font-bold">Settings</h1>
+                <h1 className="text-2xl font-bold">Ajustes</h1>
                 <p className="text-muted-foreground text-sm mt-1">
-                    Customize your FinTrack experience
+                    Personaliza tu experiencia en FinTrack
                 </p>
             </header>
 
             <div className="space-y-4">
-                {/* Install App */}
+                {/* Instalar App */}
                 {isInstallable && (
                     <Card className="border-0 bg-gradient-to-r from-primary/20 to-primary/5">
                         <CardContent className="p-4">
@@ -88,34 +88,34 @@ export default function SettingsPage() {
                                         <Download className="w-6 h-6 text-primary" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold">Install FinTrack</h3>
+                                        <h3 className="font-semibold">Instalar FinTrack</h3>
                                         <p className="text-sm text-muted-foreground">
-                                            Add to home screen for quick access
+                                            Agregar a pantalla de inicio
                                         </p>
                                     </div>
                                 </div>
                                 <Button onClick={installApp} size="sm" className="gradient-primary">
-                                    Install
+                                    Instalar
                                 </Button>
                             </div>
                         </CardContent>
                     </Card>
                 )}
 
-                {/* Notifications */}
+                {/* Notificaciones */}
                 <Card className="border-0 bg-card">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Bell className="w-5 h-5" />
-                            Notifications
+                            Notificaciones
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="font-medium">Daily Reminders</p>
+                                <p className="font-medium">Recordatorios Diarios</p>
                                 <p className="text-sm text-muted-foreground">
-                                    Get reminded at 8 PM to log your expenses
+                                    Recibe un recordatorio a las 8 PM
                                 </p>
                             </div>
                             <Badge
@@ -128,15 +128,15 @@ export default function SettingsPage() {
                                 {notificationPermission === "granted" ? (
                                     <>
                                         <Check className="w-3 h-3" />
-                                        Enabled
+                                        Activo
                                     </>
                                 ) : notificationPermission === "denied" ? (
                                     <>
                                         <X className="w-3 h-3" />
-                                        Blocked
+                                        Bloqueado
                                     </>
                                 ) : (
-                                    "Not set"
+                                    "Sin configurar"
                                 )}
                             </Badge>
                         </div>
@@ -147,76 +147,76 @@ export default function SettingsPage() {
                                 variant="outline"
                                 className="w-full"
                             >
-                                Enable Notifications
+                                Activar Notificaciones
                             </Button>
                         )}
 
                         {notificationPermission === "denied" && (
                             <p className="text-xs text-muted-foreground bg-muted p-3 rounded-lg">
-                                Notifications are blocked. Please enable them in your browser settings.
+                                Las notificaciones están bloqueadas. Por favor habilítalas en la configuración de tu navegador.
                             </p>
                         )}
                     </CardContent>
                 </Card>
 
-                {/* App Info */}
+                {/* Información de la App */}
                 <Card className="border-0 bg-card">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Smartphone className="w-5 h-5" />
-                            App Info
+                            Información de la App
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <div className="flex items-center justify-between py-2">
-                            <span className="text-muted-foreground">Version</span>
+                            <span className="text-muted-foreground">Versión</span>
                             <span className="font-medium">1.0.0</span>
                         </div>
                         <div className="flex items-center justify-between py-2">
-                            <span className="text-muted-foreground">Theme</span>
+                            <span className="text-muted-foreground">Tema</span>
                             <div className="flex items-center gap-2">
                                 <Moon className="w-4 h-4" />
-                                <span className="font-medium">Dark</span>
+                                <span className="font-medium">Oscuro</span>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* Security */}
+                {/* Seguridad */}
                 <Card className="border-0 bg-card">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Shield className="w-5 h-5" />
-                            Privacy & Security
+                            Privacidad y Seguridad
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <div className="flex items-start gap-3 p-3 rounded-xl bg-muted">
                             <span className="text-2xl">🔒</span>
                             <div>
-                                <p className="font-medium">Your data is private</p>
+                                <p className="font-medium">Tus datos son privados</p>
                                 <p className="text-sm text-muted-foreground">
-                                    All your financial data is stored securely and never shared with third parties.
+                                    Toda tu información financiera se almacena de forma segura y nunca se comparte con terceros.
                                 </p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                {/* About */}
+                {/* Acerca de */}
                 <Card className="border-0 bg-card">
                     <CardContent className="p-4">
                         <button className="flex items-center justify-between w-full">
-                            <span>About FinTrack</span>
+                            <span>Acerca de FinTrack</span>
                             <ChevronRight className="w-5 h-5 text-muted-foreground" />
                         </button>
                     </CardContent>
                 </Card>
 
-                {/* Footer */}
+                {/* Pie de página */}
                 <div className="text-center pt-8 pb-4">
                     <p className="text-sm text-muted-foreground">
-                        Made with 💜 for better financial health
+                        Hecho con 💜 para una mejor salud financiera
                     </p>
                 </div>
             </div>

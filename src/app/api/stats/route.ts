@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { transactions } from '@/lib/db/schema';
 import { sql, gte } from 'drizzle-orm';
+
+// Prevent static generation - this route needs runtime access to database
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {

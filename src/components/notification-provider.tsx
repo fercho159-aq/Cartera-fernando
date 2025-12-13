@@ -4,24 +4,24 @@ import { useEffect } from "react";
 
 export function NotificationProvider() {
     useEffect(() => {
-        // Request notification permission
+        // Solicitar permiso de notificaciones
         if ("Notification" in window && Notification.permission === "default") {
             Notification.requestPermission();
         }
 
-        // Register service worker
+        // Registrar service worker
         if ("serviceWorker" in navigator) {
             navigator.serviceWorker
                 .register("/sw.js")
                 .then((registration) => {
-                    console.log("Service Worker registered:", registration.scope);
+                    console.log("Service Worker registrado:", registration.scope);
                 })
                 .catch((error) => {
-                    console.error("Service Worker registration failed:", error);
+                    console.error("Error al registrar Service Worker:", error);
                 });
         }
 
-        // Schedule daily reminder at 8 PM
+        // Programar recordatorio diario a las 8 PM
         scheduleReminderNotification();
     }, []);
 
@@ -34,25 +34,25 @@ export function NotificationProvider() {
         const reminderTime = new Date();
         reminderTime.setHours(20, 0, 0, 0); // 8 PM
 
-        // If it's already past 8 PM today, schedule for tomorrow
+        // Si ya pasaron las 8 PM, programar para mañana
         if (now > reminderTime) {
             reminderTime.setDate(reminderTime.getDate() + 1);
         }
 
         const timeUntilReminder = reminderTime.getTime() - now.getTime();
 
-        // Schedule the notification
+        // Programar la notificación
         setTimeout(() => {
             showReminderNotification();
-            // Schedule the next one for tomorrow
+            // Programar la siguiente para mañana
             setInterval(showReminderNotification, 24 * 60 * 60 * 1000);
         }, timeUntilReminder);
     };
 
     const showReminderNotification = () => {
         if (Notification.permission === "granted") {
-            new Notification("💰 FinTrack Reminder", {
-                body: "Did you record your expenses today?",
+            new Notification("💰 Recordatorio FinTrack", {
+                body: "¿Ya registraste tus gastos de hoy?",
                 icon: "/icon-192x192.png",
                 badge: "/icon-192x192.png",
                 tag: "daily-reminder",

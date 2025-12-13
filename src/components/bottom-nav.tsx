@@ -12,11 +12,11 @@ export function BottomNav() {
     const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     const navItems = [
-        { href: "/", icon: Home, label: "Home" },
-        { href: "/stats", icon: BarChart3, label: "Stats" },
-        { href: "#", icon: Plus, label: "Add", isButton: true },
-        { href: "/transactions", icon: ListOrdered, label: "History" },
-        { href: "/settings", icon: Settings, label: "Settings" },
+        { href: "/", icon: Home, label: "Inicio" },
+        { href: "/stats", icon: BarChart3, label: "Estadísticas" },
+        { href: "#", icon: Plus, label: "Agregar", isButton: true },
+        { href: "/transactions", icon: ListOrdered, label: "Historial" },
+        { href: "/settings", icon: Settings, label: "Ajustes" },
     ];
 
     return (
@@ -31,7 +31,7 @@ export function BottomNav() {
                                     onClick={() => setIsSheetOpen(true)}
                                     className="relative -mt-8"
                                 >
-                                    {/* Pulse ring effect */}
+                                    {/* Efecto de pulso */}
                                     <div className="absolute inset-0 rounded-full bg-primary/30 pulse-ring" />
                                     <div className="relative flex items-center justify-center w-16 h-16 rounded-full gradient-primary shadow-lg shadow-primary/30 active:scale-95 transition-transform">
                                         <Plus className="w-7 h-7 text-primary-foreground" />

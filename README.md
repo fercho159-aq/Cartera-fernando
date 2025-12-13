@@ -1,132 +1,132 @@
-# FinTrack - Personal Finance PWA
+# FinTrack - Finanzas Personales PWA
 
-A modern, responsive, and installable Progressive Web App (PWA) for Personal Finance Tracking. Built with Next.js 14, optimized for mobile usage with a "thumb-friendly" design.
+Una aplicación web progresiva (PWA) moderna, responsiva e instalable para el seguimiento de finanzas personales. Construida con Next.js 14, optimizada para uso móvil con un diseño "amigable para el pulgar".
 
 ![FinTrack Screenshot](public/icon-512x512.png)
 
-## ✨ Features
+## ✨ Características
 
-### 📱 Mobile-First UX
-- Native app-like experience
-- Floating Action Button (FAB) for quick transaction entry
-- Large, touch-friendly inputs and targets
-- Bottom navigation for easy thumb access
+### 📱 UX Mobile-First
+- Experiencia similar a una app nativa
+- Botón de Acción Flotante (FAB) para entrada rápida de transacciones
+- Entradas grandes y táctiles
+- Navegación inferior para fácil acceso con el pulgar
 
-### 💰 Transaction Management
-- Quick expense/income entry
-- Multiple categories with emoji icons
-- Recurring transactions (Daily, Weekly, Monthly)
-- Automatic recurring transaction generation
+### 💰 Gestión de Transacciones
+- Entrada rápida de gastos/ingresos
+- Múltiples categorías con iconos emoji
+- Transacciones recurrentes (Diario, Semanal, Mensual)
+- Generación automática de transacciones recurrentes
 
-### 📊 Dashboard & Visualizations
-- Current balance, income, and expense summaries
-- Donut chart for expense categories
-- Bar chart for income vs expenses (6-month trend)
-- Transaction history with date grouping
+### 📊 Dashboard y Visualizaciones
+- Resumen de balance actual, ingresos y gastos
+- Gráfica de dona para categorías de gastos
+- Gráfica de barras para ingresos vs gastos (tendencia de 6 meses)
+- Historial de transacciones agrupado por fecha
 
-### 🔔 PWA & Notifications
-- Installable on Android/iOS home screen
-- Offline support with Service Worker
-- Daily 8 PM reminder notifications
-- Dark mode by default
+### 🔔 PWA y Notificaciones
+- Instalable en pantalla de inicio Android/iOS
+- Soporte offline con Service Worker
+- Recordatorios diarios a las 8 PM
+- Modo oscuro por defecto
 
-## 🛠️ Tech Stack
+## 🛠️ Stack Tecnológico
 
 - **Framework**: Next.js 14 (App Router)
-- **Styling**: Tailwind CSS + Shadcn UI
-- **Database**: PostgreSQL (Neon Tech)
+- **Estilos**: Tailwind CSS + Shadcn UI
+- **Base de Datos**: PostgreSQL (Neon Tech)
 - **ORM**: Drizzle ORM
-- **Charts**: Recharts
-- **State Management**: Zustand
-- **Icons**: Lucide React
+- **Gráficas**: Recharts
+- **Estado**: Zustand
+- **Iconos**: Lucide React
 
-## 🚀 Getting Started
+## 🚀 Comenzar
 
-### Prerequisites
+### Prerrequisitos
 
 - Node.js 18+ 
 - npm/yarn/pnpm
-- PostgreSQL database (or use Neon Tech)
+- Base de datos PostgreSQL (o usar Neon Tech)
 
-### Installation
+### Instalación
 
-1. Clone the repository:
+1. Clonar el repositorio:
 ```bash
-git clone <repository-url>
+git clone <url-repositorio>
 cd finanzas
 ```
 
-2. Install dependencies:
+2. Instalar dependencias:
 ```bash
 npm install
 ```
 
-3. Set up environment variables:
+3. Configurar variables de entorno:
 ```bash
 cp .env.example .env.local
 ```
 
-Edit `.env.local` with your database connection string:
+Editar `.env.local` con tu cadena de conexión:
 ```env
-DATABASE_URL=postgres://user:password@host/database?sslmode=require
+DATABASE_URL=postgres://usuario:password@host/database?sslmode=require
 ```
 
-4. Push the database schema:
+4. Enviar esquema a la base de datos:
 ```bash
 npm run db:push
 ```
 
-5. Start the development server:
+5. Iniciar servidor de desarrollo:
 ```bash
 npm run dev
 ```
 
-6. Open [http://localhost:3000](http://localhost:3000) in your browser.
+6. Abrir [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-## 📁 Project Structure
+## 📁 Estructura del Proyecto
 
 ```
 finanzas/
 ├── src/
 │   ├── app/
 │   │   ├── api/
-│   │   │   ├── transactions/route.ts  # Transaction CRUD API
-│   │   │   └── stats/route.ts         # Statistics API
-│   │   ├── transactions/page.tsx      # Transaction history
-│   │   ├── stats/page.tsx             # Statistics page
-│   │   ├── settings/page.tsx          # Settings & PWA install
-│   │   ├── layout.tsx                 # Root layout
-│   │   ├── page.tsx                   # Home/Dashboard
-│   │   └── globals.css                # Global styles
+│   │   │   ├── transactions/route.ts  # API CRUD de transacciones
+│   │   │   └── stats/route.ts         # API de estadísticas
+│   │   ├── transactions/page.tsx      # Historial de transacciones
+│   │   ├── stats/page.tsx             # Página de estadísticas
+│   │   ├── settings/page.tsx          # Ajustes e instalación PWA
+│   │   ├── layout.tsx                 # Layout principal
+│   │   ├── page.tsx                   # Inicio/Dashboard
+│   │   └── globals.css                # Estilos globales
 │   ├── components/
-│   │   ├── ui/                        # Shadcn UI components
-│   │   ├── bottom-nav.tsx             # Bottom navigation
-│   │   ├── add-transaction-sheet.tsx  # Transaction form
-│   │   ├── dashboard.tsx              # Main dashboard
-│   │   ├── stat-card.tsx              # Balance/Income/Expense cards
-│   │   ├── category-chart.tsx         # Donut chart
-│   │   ├── monthly-chart.tsx          # Bar chart
-│   │   ├── transaction-list.tsx       # Transaction list
-│   │   └── notification-provider.tsx  # Push notifications
+│   │   ├── ui/                        # Componentes Shadcn UI
+│   │   ├── bottom-nav.tsx             # Navegación inferior
+│   │   ├── add-transaction-sheet.tsx  # Formulario de transacción
+│   │   ├── dashboard.tsx              # Dashboard principal
+│   │   ├── stat-card.tsx              # Tarjetas Balance/Ingresos/Gastos
+│   │   ├── category-chart.tsx         # Gráfica de dona
+│   │   ├── monthly-chart.tsx          # Gráfica de barras
+│   │   ├── transaction-list.tsx       # Lista de transacciones
+│   │   └── notification-provider.tsx  # Notificaciones push
 │   └── lib/
 │       ├── db/
-│       │   ├── schema.ts              # Database schema
-│       │   └── index.ts               # Database connection
-│       ├── store.ts                   # Zustand store
-│       └── utils.ts                   # Utilities
+│       │   ├── schema.ts              # Esquema de base de datos
+│       │   └── index.ts               # Conexión a base de datos
+│       ├── store.ts                   # Store de Zustand
+│       └── utils.ts                   # Utilidades
 ├── public/
-│   ├── manifest.json                  # PWA manifest
+│   ├── manifest.json                  # Manifest PWA
 │   ├── sw.js                          # Service worker
-│   ├── icon-192x192.png               # App icon
-│   └── icon-512x512.png               # Large app icon
-├── drizzle.config.ts                  # Drizzle ORM config
+│   ├── icon-192x192.png               # Icono de app
+│   └── icon-512x512.png               # Icono grande de app
+├── drizzle.config.ts                  # Configuración Drizzle ORM
 └── package.json
 ```
 
-## 📊 Database Schema
+## 📊 Esquema de Base de Datos
 
 ```sql
--- Transactions table
+-- Tabla de transacciones
 CREATE TABLE transactions (
   id SERIAL PRIMARY KEY,
   amount DECIMAL(12, 2) NOT NULL,
@@ -142,66 +142,66 @@ CREATE TABLE transactions (
 );
 ```
 
-## 🎨 Categories
+## 🎨 Categorías
 
-| Category | Emoji | Type |
-|----------|-------|------|
-| Food | 🍔 | Expense |
-| Transport | 🚗 | Expense |
-| Entertainment | 🎮 | Expense |
-| Health | 🏥 | Expense |
-| Shopping | 🛍️ | Expense |
-| Utilities | 💡 | Expense |
-| Salary | 💰 | Income |
-| Freelance | 💻 | Income |
-| Investment | 📈 | Income |
-| Other | 📦 | Both |
+| Categoría | Emoji | Tipo |
+|-----------|-------|------|
+| Comida | 🍔 | Gasto |
+| Transporte | 🚗 | Gasto |
+| Entretenimiento | 🎮 | Gasto |
+| Salud | 🏥 | Gasto |
+| Compras | 🛍️ | Gasto |
+| Servicios | 💡 | Gasto |
+| Salario | 💰 | Ingreso |
+| Freelance | 💻 | Ingreso |
+| Inversión | 📈 | Ingreso |
+| Otro | 📦 | Ambos |
 
-## 📱 PWA Installation
+## 📱 Instalación PWA
 
 ### Android
-1. Open the app in Chrome
-2. Tap "Add to Home Screen" in the browser menu
-3. Or wait for the install prompt
+1. Abre la app en Chrome
+2. Toca "Agregar a pantalla de inicio" en el menú del navegador
+3. O espera la solicitud de instalación
 
 ### iOS
-1. Open the app in Safari
-2. Tap the Share button
-3. Select "Add to Home Screen"
+1. Abre la app en Safari
+2. Toca el botón Compartir
+3. Selecciona "Agregar a pantalla de inicio"
 
-## 🔔 Notifications
+## 🔔 Notificaciones
 
-The app sends a daily reminder at 8:00 PM asking "Did you record your expenses today?"
+La app envía un recordatorio diario a las 8:00 PM preguntando "¿Ya registraste tus gastos de hoy?"
 
-To enable notifications:
-1. Go to Settings
-2. Click "Enable Notifications"
-3. Accept the browser permission
+Para habilitar notificaciones:
+1. Ve a Ajustes
+2. Haz clic en "Activar Notificaciones"
+3. Acepta el permiso del navegador
 
-## 🧪 Available Scripts
+## 🧪 Scripts Disponibles
 
-| Script | Description |
+| Script | Descripción |
 |--------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm run db:generate` | Generate database migrations |
-| `npm run db:push` | Push schema to database |
-| `npm run db:studio` | Open Drizzle Studio |
+| `npm run dev` | Iniciar servidor de desarrollo |
+| `npm run build` | Construir para producción |
+| `npm run start` | Iniciar servidor de producción |
+| `npm run lint` | Ejecutar ESLint |
+| `npm run db:generate` | Generar migraciones de base de datos |
+| `npm run db:push` | Enviar esquema a base de datos |
+| `npm run db:studio` | Abrir Drizzle Studio |
 
-## 🤝 Contributing
+## 🤝 Contribuir
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+1. Fork el repositorio
+2. Crea una rama de feature
+3. Haz commit de tus cambios
+4. Push a la rama
+5. Abre un Pull Request
 
-## 📄 License
+## 📄 Licencia
 
-MIT License - feel free to use this project for your own purposes!
+Licencia MIT - ¡siéntete libre de usar este proyecto para tus propios propósitos!
 
 ---
 
-Made with 💜 for better financial health
+Hecho con 💜 para una mejor salud financiera

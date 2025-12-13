@@ -13,9 +13,9 @@ interface StatCardProps {
 
 export function StatCard({ title, value, type, className }: StatCardProps) {
     const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat("en-US", {
+        return new Intl.NumberFormat("es-MX", {
             style: "currency",
-            currency: "USD",
+            currency: "MXN",
             minimumFractionDigits: 0,
             maximumFractionDigits: 0,
         }).format(amount);
@@ -39,7 +39,7 @@ export function StatCard({ title, value, type, className }: StatCardProps) {
                 className
             )}
         >
-            {/* Background decoration */}
+            {/* Decoración de fondo */}
             {type === "balance" && (
                 <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10" />
             )}

@@ -23,11 +23,26 @@ interface MonthlyChartProps {
     data: MonthlyData[];
 }
 
+const monthLabels: Record<string, string> = {
+    'Jan': 'Ene',
+    'Feb': 'Feb',
+    'Mar': 'Mar',
+    'Apr': 'Abr',
+    'May': 'May',
+    'Jun': 'Jun',
+    'Jul': 'Jul',
+    'Aug': 'Ago',
+    'Sep': 'Sep',
+    'Oct': 'Oct',
+    'Nov': 'Nov',
+    'Dec': 'Dic',
+};
+
 export function MonthlyChart({ data }: MonthlyChartProps) {
     const chartData = data.map((item) => ({
-        name: item.month,
-        income: Number(item.income),
-        expense: Number(item.expense),
+        name: monthLabels[item.month] || item.month,
+        ingresos: Number(item.income),
+        gastos: Number(item.expense),
     }));
 
     const CustomTooltip = ({ active, payload, label }: { active?: boolean; payload?: { value: number; dataKey: string; color: string }[]; label?: string }) => {
@@ -57,12 +72,12 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
         return (
             <Card className="border-0 bg-card">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Income vs Expenses</CardTitle>
+                    <CardTitle className="text-lg">Ingresos vs Gastos</CardTitle>
                 </CardHeader>
                 <CardContent className="flex items-center justify-center h-48">
                     <p className="text-muted-foreground text-center">
-                        No data yet.<br />
-                        Add your first transaction!
+                        Sin datos aún.<br />
+                        ¡Agrega tu primera transacción!
                     </p>
                 </CardContent>
             </Card>
@@ -72,7 +87,7 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
     return (
         <Card className="border-0 bg-card">
             <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Income vs Expenses</CardTitle>
+                <CardTitle className="text-lg">Ingresos vs Gastos</CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="h-64 -ml-4">
@@ -110,13 +125,13 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
                                 )}
                             />
                             <Bar
-                                dataKey="income"
+                                dataKey="ingresos"
                                 fill="url(#incomeGradient)"
                                 radius={[4, 4, 0, 0]}
                                 maxBarSize={40}
                             />
                             <Bar
-                                dataKey="expense"
+                                dataKey="gastos"
                                 fill="url(#expenseGradient)"
                                 radius={[4, 4, 0, 0]}
                                 maxBarSize={40}

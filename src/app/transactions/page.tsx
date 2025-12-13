@@ -10,7 +10,7 @@ export default function TransactionsPage() {
 
     useEffect(() => {
         const fetchTransactions = async () => {
-            if (transactions.length > 0) return; // Already loaded
+            if (transactions.length > 0) return; // Ya cargadas
 
             setLoading(true);
             try {
@@ -20,7 +20,7 @@ export default function TransactionsPage() {
                     setTransactions(data);
                 }
             } catch (error) {
-                console.error("Error fetching transactions:", error);
+                console.error("Error al cargar transacciones:", error);
             } finally {
                 setLoading(false);
             }
@@ -40,9 +40,9 @@ export default function TransactionsPage() {
     return (
         <main className="min-h-screen px-4 pt-6 pb-24">
             <header className="mb-6">
-                <h1 className="text-2xl font-bold">Transaction History</h1>
+                <h1 className="text-2xl font-bold">Historial de Transacciones</h1>
                 <p className="text-muted-foreground text-sm mt-1">
-                    All your transactions from the last 6 months
+                    Todas tus transacciones de los últimos 6 meses
                 </p>
             </header>
 

@@ -4,6 +4,9 @@ import { transactions, NewTransaction } from '@/lib/db/schema';
 import { desc, gte, and, sql } from 'drizzle-orm';
 import { addDays, addWeeks, addMonths } from 'date-fns';
 
+// Prevent static generation - this route needs runtime access to database
+export const dynamic = 'force-dynamic';
+
 // Helper to calculate next occurrence
 function calculateNextOccurrence(date: Date, period: string): Date | null {
     switch (period) {

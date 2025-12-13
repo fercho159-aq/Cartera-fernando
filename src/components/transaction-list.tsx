@@ -2,10 +2,10 @@
 
 import { Transaction } from "@/lib/db/schema";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { ArrowUpRight, ArrowDownLeft, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { es } from "date-fns/locale";
 
 const categoryEmojis: Record<string, string> = {
     food: "🍔",
@@ -20,6 +20,19 @@ const categoryEmojis: Record<string, string> = {
     other: "📦",
 };
 
+const categoryLabels: Record<string, string> = {
+    food: "Comida",
+    transport: "Transporte",
+    entertainment: "Entretenimiento",
+    health: "Salud",
+    shopping: "Compras",
+    utilities: "Servicios",
+    salary: "Salario",
+    freelance: "Freelance",
+    investment: "Inversión",
+    other: "Otro",
+};
+
 interface TransactionItemProps {
     transaction: Transaction;
 }
@@ -27,10 +40,11 @@ interface TransactionItemProps {
 export function TransactionItem({ transaction }: TransactionItemProps) {
     const isIncome = transaction.type === "income";
     const emoji = categoryEmojis[transaction.category] || "📦";
+    const categoryLabel = categoryLabels[transaction.category] || transaction.category;
 
     return (
         <Card className="flex items-center gap-4 p-4 border-0 bg-card card-hover">
-            {/* Category Icon */}
+            {/* Icono de Categoría */}
             <div
                 className={cn(
                     "w-12 h-12 rounded-xl flex items-center justify-center text-2xl",
@@ -40,7 +54,7 @@ export function TransactionItem({ transaction }: TransactionItemProps) {
                 {emoji}
             </div>
 
-            {/* Transaction Details */}
+            {/* Detalles de la Transacción */}
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                     <h3 className="font-medium truncate">{transaction.title}</h3>
@@ -49,13 +63,13 @@ export function TransactionItem({ transaction }: TransactionItemProps) {
                     )}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span className="capitalize">{transaction.category}</span>
+                    <span className="capitalize">{categoryLabel}</span>
                     <span>•</span>
-                    <span>{format(new Date(transaction.date), "MMM d")}</span>
+                    <span>{format(new Date(transaction.date), "d MMM", { locale: es })}</span>
                 </div>
             </div>
 
-            {/* Amount */}
+            {/* Monto */}
             <div className="text-right">
                 <p
                     className={cn(
@@ -72,7 +86,7 @@ export function TransactionItem({ transaction }: TransactionItemProps) {
                         <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
                     )}
                     <span className="text-xs text-muted-foreground capitalize">
-                        {transaction.type}
+                        {isIncome ? "Ingreso" : "Gasto"}
                     </span>
                 </div>
             </div>
@@ -94,16 +108,16 @@ export function TransactionList({ transactions, limit }: TransactionListProps) {
         return (
             <div className="text-center py-12">
                 <p className="text-lg font-medium text-muted-foreground">
-                    No transactions yet
+                    Sin transacciones aún
                 </p>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Tap the + button to add your first transaction
+                    Toca el botón + para agregar tu primera transacción
                 </p>
             </div>
         );
     }
 
-    // Group transactions by date
+    // Agrupar transacciones por fecha
     const groupedTransactions: Record<string, Transaction[]> = {};
 
     displayTransactions.forEach((transaction) => {
@@ -122,13 +136,13 @@ export function TransactionList({ transactions, limit }: TransactionListProps) {
                 const isYesterday =
                     format(new Date(Date.now() - 86400000), "yyyy-MM-dd") === dateKey;
 
-                let dateLabel = format(date, "EEEE, MMM d");
-                if (isToday) dateLabel = "Today";
-                if (isYesterday) dateLabel = "Yesterday";
+                let dateLabel = format(date, "EEEE, d 'de' MMMM", { locale: es });
+                if (isToday) dateLabel = "Hoy";
+                if (isYesterday) dateLabel = "Ayer";
 
                 return (
                     <div key={dateKey}>
-                        <h3 className="text-sm font-medium text-muted-foreground mb-3 px-1">
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3 px-1 capitalize">
                             {dateLabel}
                         </h3>
                         <div className="space-y-2">

@@ -6,7 +6,7 @@ const STATIC_ASSETS = [
     '/icon-512x512.png',
 ];
 
-// Install event - cache static assets
+// Evento de instalación - cachear assets estáticos
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
@@ -16,7 +16,7 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Activate event - clean up old caches
+// Evento de activación - limpiar caches antiguos
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -30,14 +30,14 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch event - network first, fall back to cache
+// Evento de fetch - red primero, caer en cache
 self.addEventListener('fetch', (event) => {
-    // Skip non-GET requests
+    // Saltar peticiones que no sean GET
     if (event.request.method !== 'GET') {
         return;
     }
 
-    // Skip API requests - always go to network
+    // Saltar peticiones API - siempre ir a la red
     if (event.request.url.includes('/api/')) {
         return;
     }
@@ -45,7 +45,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
         fetch(event.request)
             .then((response) => {
-                // Clone the response before caching
+                // Clonar la respuesta antes de cachear
                 const responseClone = response.clone();
                 caches.open(CACHE_NAME).then((cache) => {
                     cache.put(event.request, responseClone);
@@ -53,41 +53,41 @@ self.addEventListener('fetch', (event) => {
                 return response;
             })
             .catch(() => {
-                // If network fails, try cache
+                // Si falla la red, intentar cache
                 return caches.match(event.request).then((cachedResponse) => {
                     if (cachedResponse) {
                         return cachedResponse;
                     }
-                    // Return offline page for navigation requests
+                    // Retornar página offline para navegación
                     if (event.request.mode === 'navigate') {
                         return caches.match('/');
                     }
-                    return new Response('Offline', { status: 503 });
+                    return new Response('Sin conexión', { status: 503 });
                 });
             })
     );
 });
 
-// Push notification event
+// Evento de notificación push
 self.addEventListener('push', (event) => {
     const options = {
-        body: event.data?.text() || 'Did you record your expenses today?',
+        body: event.data?.text() || '¿Ya registraste tus gastos de hoy?',
         icon: '/icon-192x192.png',
         badge: '/icon-192x192.png',
         tag: 'fintrack-notification',
         requireInteraction: true,
         actions: [
-            { action: 'open', title: 'Open App' },
-            { action: 'dismiss', title: 'Dismiss' },
+            { action: 'open', title: 'Abrir App' },
+            { action: 'dismiss', title: 'Descartar' },
         ],
     };
 
     event.waitUntil(
-        self.registration.showNotification('💰 FinTrack Reminder', options)
+        self.registration.showNotification('💰 Recordatorio FinTrack', options)
     );
 });
 
-// Notification click event
+// Evento de click en notificación
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
@@ -97,13 +97,13 @@ self.addEventListener('notificationclick', (event) => {
 
     event.waitUntil(
         clients.matchAll({ type: 'window' }).then((clientList) => {
-            // If app is already open, focus it
+            // Si la app ya está abierta, enfocarla
             for (const client of clientList) {
                 if ('focus' in client) {
                     return client.focus();
                 }
             }
-            // Otherwise open new window
+            // Sino abrir nueva ventana
             if (clients.openWindow) {
                 return clients.openWindow('/');
             }
