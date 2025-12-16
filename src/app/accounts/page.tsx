@@ -198,150 +198,146 @@ export default function AccountsPage() {
     }
 
     return (
-        <main className="min-h-screen px-4 pt-2 pb-24">
-            <header className="mb-6">
-                <h1 className="text-2xl font-bold">Cuentas Compartidas</h1>
-                <p className="text-muted-foreground text-sm mt-1">
-                    Comparte tus finanzas con otros
+        <main className="min-h-screen px-4 pt-4 pb-28">
+            {/* Header con Liquid Glass */}
+            <header className="mb-8">
+                <h1 className="text-3xl font-bold tracking-tight">Cuentas Compartidas</h1>
+                <p className="text-muted-foreground text-sm mt-2">
+                    Colabora en tus finanzas con familia y amigos
                 </p>
             </header>
 
-            {/* Botones de acción */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            {/* Botones de acción con Liquid Glass */}
+            <div className="grid grid-cols-2 gap-3 mb-8">
                 <Button
                     onClick={() => setIsSheetOpen(true)}
-                    className="h-14 gradient-primary text-base font-semibold"
+                    className="h-16 gradient-primary text-base font-semibold rounded-2xl shadow-lg shadow-primary/25 active:scale-95 transition-transform"
                 >
                     <Plus className="w-5 h-5 mr-2" />
                     Crear Cuenta
                 </Button>
-                <Button
+                <button
                     onClick={() => setIsJoinSheetOpen(true)}
-                    variant="outline"
-                    className="h-14 text-base font-semibold"
+                    className="h-16 text-base font-semibold rounded-2xl glass-pill active:scale-95 transition-transform"
                 >
-                    <UserPlus className="w-5 h-5 mr-2" />
+                    <UserPlus className="w-5 h-5 mr-2 inline" />
                     Unirse
-                </Button>
+                </button>
             </div>
 
             {/* Lista de Cuentas */}
             {accounts.length === 0 ? (
-                <div className="text-center py-12">
-                    <Users className="w-16 h-16 mx-auto text-muted-foreground/30 mb-4" />
-                    <p className="text-lg font-medium text-muted-foreground">
+                <div className="text-center py-16">
+                    <div className="w-20 h-20 mx-auto mb-6 rounded-3xl glass-pill flex items-center justify-center">
+                        <Users className="w-10 h-10 text-muted-foreground/50" />
+                    </div>
+                    <p className="text-xl font-semibold text-muted-foreground">
                         Sin cuentas compartidas
                     </p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        Crea una cuenta o únete con un código
+                    <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
+                        Crea una cuenta para colaborar o únete con un código de invitación
                     </p>
                 </div>
             ) : (
-                <div className="space-y-3">
-                    {accounts.map((account) => (
-                        <Card
+                <div className="space-y-4">
+                    {accounts.map((account, index) => (
+                        <div
                             key={account.id}
-                            className="p-4 border-0 bg-card"
-                        >
-                            <div className="flex items-start gap-3">
-                                {/* Icono */}
+                            className="card-glass p-5 card-hover card-press animate-fade-in-up"
+                            style={{ animationDelay: `${index * 0.05}s` }}>
+                            <div className="flex items-start gap-4">
+                                {/* Icono con Liquid Glass */}
                                 <div
                                     className={cn(
-                                        "w-12 h-12 rounded-xl flex items-center justify-center",
+                                        "w-14 h-14 rounded-2xl flex items-center justify-center glass-subtle",
                                         account.isOwner
-                                            ? "bg-primary/20 text-primary"
-                                            : "bg-chart-2/20 text-chart-2"
+                                            ? "text-primary"
+                                            : "text-chart-1"
                                     )}
                                 >
                                     {account.isOwner ? (
-                                        <Crown className="w-6 h-6" />
+                                        <Crown className="w-7 h-7" />
                                     ) : (
-                                        <Users className="w-6 h-6" />
+                                        <Users className="w-7 h-7" />
                                     )}
                                 </div>
 
                                 {/* Info */}
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold truncate">{account.name}</h3>
+                                    <h3 className="font-semibold text-lg truncate">{account.name}</h3>
                                     {account.description && (
-                                        <p className="text-sm text-muted-foreground truncate">
+                                        <p className="text-sm text-muted-foreground truncate mt-0.5">
                                             {account.description}
                                         </p>
                                     )}
-                                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                    <div className="flex items-center gap-2 mt-2">
                                         <span className={cn(
-                                            "px-2 py-0.5 rounded-full",
+                                            "px-3 py-1 rounded-full text-xs font-medium badge-liquid",
                                             account.isOwner
-                                                ? "bg-primary/10 text-primary"
-                                                : "bg-muted"
+                                                ? ""
+                                                : "!bg-chart-1/10 !text-chart-1 !border-chart-1/20"
                                         )}>
-                                            {account.isOwner ? "Dueño" : "Miembro"}
+                                            {account.isOwner ? "👑 Dueño" : "👤 Miembro"}
                                         </span>
-                                        <span>•</span>
-                                        <span>
+                                        <span className="text-xs text-muted-foreground">
                                             {format(new Date(account.createdAt), "d MMM yyyy", { locale: es })}
                                         </span>
                                     </div>
                                 </div>
                             </div>
 
-                            {/* Acciones */}
-                            <div className="flex gap-2 mt-4 pt-3 border-t border-border">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="flex-1"
+                            {/* Acciones con divider suave */}
+                            <div className="flex gap-2 mt-5 pt-4">
+                                <div className="absolute left-5 right-5 h-px divider-soft" style={{ marginTop: '-17px' }} />
+                                <button
+                                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl glass-subtle text-sm font-medium active:scale-95 transition-transform"
                                     onClick={() => handleViewMembers(account)}
                                 >
-                                    <Users className="w-4 h-4 mr-2" />
+                                    <Users className="w-4 h-4" />
                                     Miembros
-                                </Button>
+                                </button>
                                 {account.isOwner && account.inviteCode && (
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="flex-1"
+                                    <button
+                                        className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl glass-subtle text-sm font-medium active:scale-95 transition-transform"
                                         onClick={() => handleCopyCode(account.inviteCode!)}
                                     >
                                         {copiedCode ? (
                                             <>
-                                                <Check className="w-4 h-4 mr-2 text-green-500" />
-                                                Copiado
+                                                <Check className="w-4 h-4 text-chart-1" />
+                                                <span className="text-chart-1">Copiado</span>
                                             </>
                                         ) : (
                                             <>
-                                                <Share2 className="w-4 h-4 mr-2" />
+                                                <Share2 className="w-4 h-4" />
                                                 Código
                                             </>
                                         )}
-                                    </Button>
+                                    </button>
                                 )}
                                 {account.isOwner && (
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-destructive hover:bg-destructive/10"
+                                    <button
+                                        className="w-12 flex items-center justify-center py-2.5 rounded-xl glass-subtle text-destructive active:scale-95 transition-transform"
                                         onClick={() => setConfirmDialog({ open: true, account })}
                                     >
                                         <Trash2 className="w-4 h-4" />
-                                    </Button>
+                                    </button>
                                 )}
                             </div>
-                        </Card>
+                        </div>
                     ))}
                 </div>
             )}
 
-            {/* Sheet para crear cuenta */}
+            {/* Sheet para crear cuenta con Liquid Glass */}
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                <SheetContent side="bottom" className="h-[60vh] rounded-t-3xl px-6 pb-8">
-                    <SheetHeader className="pb-4">
-                        <SheetTitle className="text-xl">Crear Cuenta Compartida</SheetTitle>
+                <SheetContent side="bottom" className="h-[60vh] rounded-t-[2rem] sheet-liquid px-6 pb-8">
+                    <SheetHeader className="pb-6">
+                        <SheetTitle className="text-2xl font-bold">Crear Cuenta Compartida</SheetTitle>
                     </SheetHeader>
 
-                    <form onSubmit={handleCreateAccount} className="space-y-5">
-                        <div className="space-y-2">
-                            <Label htmlFor="name" className="text-muted-foreground">
+                    <form onSubmit={handleCreateAccount} className="space-y-6">
+                        <div className="space-y-3">
+                            <Label htmlFor="name" className="text-sm text-muted-foreground font-medium">
                                 Nombre de la cuenta
                             </Label>
                             <Input
@@ -349,13 +345,13 @@ export default function AccountsPage() {
                                 placeholder="Ej: Gastos del hogar"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="h-14 text-lg bg-muted border-0 rounded-xl"
+                                className="h-14 text-lg input-liquid rounded-2xl px-4"
                                 required
                             />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="description" className="text-muted-foreground">
+                        <div className="space-y-3">
+                            <Label htmlFor="description" className="text-sm text-muted-foreground font-medium">
                                 Descripción (opcional)
                             </Label>
                             <Input
@@ -363,7 +359,7 @@ export default function AccountsPage() {
                                 placeholder="¿Para qué es esta cuenta?"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
-                                className="h-14 text-lg bg-muted border-0 rounded-xl"
+                                className="h-14 text-lg input-liquid rounded-2xl px-4"
                             />
                         </div>
 

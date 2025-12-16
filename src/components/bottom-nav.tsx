@@ -26,8 +26,8 @@ export function BottomNav() {
 
     return (
         <>
-            <nav 
-                className="fixed z-50 glass bg-card/80 border-t border-border safe-area-inset-bottom"
+            <nav
+                className="fixed z-50 nav-liquid safe-area-inset-bottom"
                 style={{
                     bottom: 0,
                     left: 0,
@@ -35,19 +35,20 @@ export function BottomNav() {
                     position: 'fixed',
                 }}
             >
-                <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+                <div className="flex items-center justify-around h-20 max-w-lg mx-auto px-4">
                     {navItems.map((item) => {
                         if (item.isButton) {
                             return (
                                 <button
                                     key={item.label}
                                     onClick={() => setIsSheetOpen(true)}
-                                    className="relative -mt-8"
+                                    className="relative -mt-10"
                                 >
-                                    {/* Efecto de pulso */}
-                                    <div className="absolute inset-0 rounded-full bg-primary/30 pulse-ring" />
-                                    <div className="relative flex items-center justify-center w-16 h-16 rounded-full gradient-primary shadow-lg shadow-primary/30 active:scale-95 transition-transform">
-                                        <Plus className="w-7 h-7 text-primary-foreground" />
+                                    {/* Efecto de pulso suave */}
+                                    <div className="absolute inset-0 rounded-full bg-primary/20 pulse-ring" />
+                                    {/* FAB con Liquid Glass */}
+                                    <div className="relative flex items-center justify-center w-16 h-16 rounded-full fab-liquid active:scale-90 transition-transform">
+                                        <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
                                     </div>
                                 </button>
                             );
@@ -59,12 +60,20 @@ export function BottomNav() {
                                 key={item.href}
                                 href={item.href}
                                 className={cn(
-                                    "flex flex-col items-center justify-center w-16 h-full gap-1 transition-colors",
-                                    isActive ? "text-primary" : "text-muted-foreground"
+                                    "flex flex-col items-center justify-center px-4 py-2 rounded-2xl transition-all duration-300",
+                                    isActive
+                                        ? "glass-pill text-primary"
+                                        : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
-                                <item.icon className="w-6 h-6" />
-                                <span className="text-xs font-medium">{item.label}</span>
+                                <item.icon className={cn(
+                                    "w-6 h-6 transition-transform duration-300",
+                                    isActive && "scale-110"
+                                )} strokeWidth={isActive ? 2.5 : 2} />
+                                <span className={cn(
+                                    "text-[11px] mt-1 font-medium transition-all duration-300",
+                                    isActive ? "opacity-100" : "opacity-70"
+                                )}>{item.label}</span>
                             </Link>
                         );
                     })}
@@ -75,3 +84,4 @@ export function BottomNav() {
         </>
     );
 }
+
