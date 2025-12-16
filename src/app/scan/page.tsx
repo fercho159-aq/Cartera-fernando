@@ -12,6 +12,37 @@ interface TicketData {
   confidence: number;
 }
 
+// Función para comprimir imagen
+const compressImage = (base64: string, maxWidth = 1024, quality = 0.7): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      // Escalar si es muy grande
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width;
+        width = maxWidth;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      } else {
+        resolve(base64);
+      }
+    };
+    img.onerror = () => resolve(base64);
+    img.src = base64;
+  });
+};
+
 export default function ScanPage() {
   const router = useRouter();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
@@ -19,14 +50,16 @@ export default function ScanPage() {
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<TicketData | null>(null);
 
-  const handleImageCapture = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageCapture = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setError(null);
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         const result = e.target?.result as string;
-        setCapturedImage(result);
+        // Comprimir la imagen antes de guardarla
+        const compressed = await compressImage(result, 1024, 0.7);
+        setCapturedImage(compressed);
       };
       reader.onerror = () => {
         setError("Error al leer la imagen. Intenta de nuevo.");
@@ -48,6 +81,10 @@ export default function ScanPage() {
         body: JSON.stringify({ image: capturedImage }),
       });
 
+      if (response.status === 413) {
+        throw new Error("La imagen es muy grande. Intenta con una foto más pequeña.");
+      }
+
       const result = await response.json();
 
       if (!response.ok) {
@@ -57,7 +94,8 @@ export default function ScanPage() {
       setScanResult(result.data);
     } catch (err) {
       console.error("Error processing ticket:", err);
-      setError("Error al procesar el ticket. Verifica que la imagen sea clara.");
+      const errorMsg = err instanceof Error ? err.message : "Error al procesar el ticket.";
+      setError(errorMsg);
     } finally {
       setIsProcessing(false);
     }
