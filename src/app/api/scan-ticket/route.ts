@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 
     const prompt = `Analiza esta imagen de un ticket o recibo de compra y extrae la siguiente información en formato JSON.
 
