@@ -11,17 +11,22 @@ import {
     Smartphone,
     Shield,
     Moon,
+    Sun,
+    Monitor,
     ChevronRight,
     Check,
     X,
     User,
     LogOut,
-    Loader2
+    Loader2,
+    Palette
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/components/theme-provider";
 
 export default function SettingsPage() {
     const { data: session } = useSession();
+    const { theme, setTheme, resolvedTheme } = useTheme();
     const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
     const [isInstallable, setIsInstallable] = useState(false);
     const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
@@ -79,6 +84,12 @@ export default function SettingsPage() {
         await signOut({ callbackUrl: "/login" });
     };
 
+    const themeOptions = [
+        { value: "light" as const, label: "Claro", icon: Sun },
+        { value: "dark" as const, label: "Oscuro", icon: Moon },
+        { value: "system" as const, label: "Sistema", icon: Monitor },
+    ];
+
     return (
         <main className="min-h-screen px-4 pt-6 pb-24">
             <header className="mb-6">
@@ -90,7 +101,7 @@ export default function SettingsPage() {
 
             <div className="space-y-4">
                 {/* Cuenta de Usuario */}
-                <Card className="border-0 bg-card">
+                <Card className="border-0 bg-card shadow-sm">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <User className="w-5 h-5" />
@@ -133,9 +144,45 @@ export default function SettingsPage() {
                     </CardContent>
                 </Card>
 
+                {/* Tema */}
+                <Card className="border-0 bg-card shadow-sm">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <Palette className="w-5 h-5" />
+                            Apariencia
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-3 gap-2">
+                            {themeOptions.map((option) => {
+                                const isActive = theme === option.value;
+                                const Icon = option.icon;
+                                return (
+                                    <button
+                                        key={option.value}
+                                        onClick={() => setTheme(option.value)}
+                                        className={cn(
+                                            "flex flex-col items-center gap-2 p-4 rounded-xl transition-all",
+                                            isActive
+                                                ? "bg-primary text-primary-foreground shadow-lg"
+                                                : "bg-muted hover:bg-muted/80"
+                                        )}
+                                    >
+                                        <Icon className="w-6 h-6" />
+                                        <span className="text-sm font-medium">{option.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                        <p className="text-xs text-muted-foreground mt-3 text-center">
+                            Tema actual: {resolvedTheme === "dark" ? "🌙 Oscuro" : "☀️ Claro"}
+                        </p>
+                    </CardContent>
+                </Card>
+
                 {/* Instalar App */}
                 {isInstallable && (
-                    <Card className="border-0 bg-gradient-to-r from-primary/20 to-primary/5">
+                    <Card className="border-0 bg-gradient-to-r from-primary/20 to-primary/5 shadow-sm">
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
@@ -158,7 +205,7 @@ export default function SettingsPage() {
                 )}
 
                 {/* Notificaciones */}
-                <Card className="border-0 bg-card">
+                <Card className="border-0 bg-card shadow-sm">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Bell className="w-5 h-5" />
@@ -215,7 +262,7 @@ export default function SettingsPage() {
                 </Card>
 
                 {/* Información de la App */}
-                <Card className="border-0 bg-card">
+                <Card className="border-0 bg-card shadow-sm">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Smartphone className="w-5 h-5" />
@@ -227,18 +274,11 @@ export default function SettingsPage() {
                             <span className="text-muted-foreground">Versión</span>
                             <span className="font-medium">1.0.0</span>
                         </div>
-                        <div className="flex items-center justify-between py-2">
-                            <span className="text-muted-foreground">Tema</span>
-                            <div className="flex items-center gap-2">
-                                <Moon className="w-4 h-4" />
-                                <span className="font-medium">Oscuro</span>
-                            </div>
-                        </div>
                     </CardContent>
                 </Card>
 
                 {/* Seguridad */}
-                <Card className="border-0 bg-card">
+                <Card className="border-0 bg-card shadow-sm">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-lg flex items-center gap-2">
                             <Shield className="w-5 h-5" />
@@ -259,7 +299,7 @@ export default function SettingsPage() {
                 </Card>
 
                 {/* Acerca de */}
-                <Card className="border-0 bg-card">
+                <Card className="border-0 bg-card shadow-sm">
                     <CardContent className="p-4">
                         <button className="flex items-center justify-between w-full">
                             <span>Acerca de FinTrack</span>
@@ -278,4 +318,3 @@ export default function SettingsPage() {
         </main>
     );
 }
-

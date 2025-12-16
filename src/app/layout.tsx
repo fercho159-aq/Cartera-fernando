@@ -4,6 +4,7 @@ import "./globals.css";
 import { BottomNav } from "@/components/bottom-nav";
 import { NotificationProvider } from "@/components/notification-provider";
 import { AuthProvider } from "@/components/auth-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -40,8 +41,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className="dark">
+    <html lang="es" className="" suppressHydrationWarning>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  } else if (theme === 'light') {
+                    document.documentElement.classList.add('light');
+                  } else {
+                    var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    document.documentElement.classList.add(systemTheme);
+                  }
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
         <link rel="apple-touch-icon" href="/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -50,11 +70,13 @@ export default function RootLayout({
         className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-screen pb-24 pt-safe`}
       >
         <AuthProvider>
-          <NotificationProvider />
-          <div className="pt-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' }}>
-            {children}
-          </div>
-          <BottomNav />
+          <ThemeProvider>
+            <NotificationProvider />
+            <div className="pt-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' }}>
+              {children}
+            </div>
+            <BottomNav />
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
