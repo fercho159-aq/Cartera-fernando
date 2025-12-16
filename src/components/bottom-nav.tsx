@@ -26,7 +26,15 @@ export function BottomNav() {
 
     return (
         <>
-            <nav className="fixed bottom-0 left-0 right-0 z-50 glass bg-card/80 border-t border-border safe-area-inset-bottom">
+            <nav 
+                className="fixed z-50 glass bg-card/80 border-t border-border safe-area-inset-bottom"
+                style={{
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    position: 'fixed',
+                }}
+            >
                 <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
                     {navItems.map((item) => {
                         if (item.isButton) {
