@@ -4,8 +4,6 @@ import { getCurrentUserId } from '@/lib/auth-helpers';
 
 export const dynamic = 'force-dynamic';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
-
 interface TicketData {
   amount: number;
   title: string;
@@ -16,6 +14,16 @@ interface TicketData {
 
 export async function POST(request: NextRequest) {
   try {
+    // Verificar API Key primero
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      console.error('GEMINI_API_KEY no está configurada');
+      return NextResponse.json(
+        { error: 'Servicio de escaneo no configurado. Contacta al administrador.' },
+        { status: 503 }
+      );
+    }
+
     const userId = await getCurrentUserId();
     if (!userId) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
@@ -33,6 +41,7 @@ export async function POST(request: NextRequest) {
     // Remover el prefijo data:image/...;base64, si existe
     const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
 
+    const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     const prompt = `Analiza esta imagen de un ticket o recibo de compra y extrae la siguiente información en formato JSON.
@@ -61,6 +70,8 @@ Si no puedes leer algún dato, usa valores por defecto razonables:
 
 Recuerda: responde SOLO con el JSON, sin explicaciones.`;
 
+    console.log('Enviando imagen a Gemini...');
+    
     const result = await model.generateContent([
       prompt,
       {
@@ -73,6 +84,8 @@ Recuerda: responde SOLO con el JSON, sin explicaciones.`;
 
     const response = await result.response;
     const text = response.text();
+    
+    console.log('Respuesta de Gemini:', text.substring(0, 200));
 
     // Intentar parsear la respuesta como JSON
     let ticketData: TicketData;
@@ -111,9 +124,21 @@ Recuerda: responde SOLO con el JSON, sin explicaciones.`;
     });
   } catch (error) {
     console.error('Error al procesar ticket:', error);
+    
+    // Dar mensaje más específico según el tipo de error
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    
+    if (errorMessage.includes('API_KEY')) {
+      return NextResponse.json(
+        { error: 'API Key inválida. Contacta al administrador.' },
+        { status: 503 }
+      );
+    }
+    
     return NextResponse.json(
-      { error: 'Error al procesar la imagen del ticket' },
+      { error: 'Error al procesar la imagen. Intenta con otra foto más clara.' },
       { status: 500 }
     );
   }
 }
+
