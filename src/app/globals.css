@@ -125,6 +125,43 @@
   --expense: oklch(0.63 0.24 25.3);
 }
 
+/* Tema Girly - Rosa y Lavanda */
+.girly {
+  --background: oklch(0.97 0.02 340);
+  --foreground: oklch(0.25 0.03 340);
+  --card: oklch(0.99 0.01 340);
+  --card-foreground: oklch(0.25 0.03 340);
+  --popover: oklch(0.99 0.01 340);
+  --popover-foreground: oklch(0.25 0.03 340);
+  --primary: oklch(0.65 0.2 350);
+  --primary-foreground: oklch(0.99 0.01 340);
+  --secondary: oklch(0.92 0.04 300);
+  --secondary-foreground: oklch(0.30 0.03 300);
+  --muted: oklch(0.93 0.03 340);
+  --muted-foreground: oklch(0.50 0.04 340);
+  --accent: oklch(0.88 0.06 320);
+  --accent-foreground: oklch(0.25 0.03 320);
+  --destructive: oklch(0.60 0.22 25);
+  --border: oklch(0.88 0.04 340);
+  --input: oklch(0.90 0.03 340);
+  --ring: oklch(0.65 0.2 350);
+  --chart-1: oklch(0.70 0.18 142);
+  --chart-2: oklch(0.65 0.2 350);
+  --chart-3: oklch(0.70 0.15 300);
+  --chart-4: oklch(0.65 0.12 30);
+  --chart-5: oklch(0.60 0.15 200);
+  --sidebar: oklch(0.95 0.025 340);
+  --sidebar-foreground: oklch(0.25 0.03 340);
+  --sidebar-primary: oklch(0.65 0.2 350);
+  --sidebar-primary-foreground: oklch(0.99 0.01 340);
+  --sidebar-accent: oklch(0.90 0.04 320);
+  --sidebar-accent-foreground: oklch(0.25 0.03 320);
+  --sidebar-border: oklch(0.88 0.04 340);
+  --sidebar-ring: oklch(0.65 0.2 350);
+  --income: oklch(0.70 0.18 142);
+  --expense: oklch(0.65 0.2 350);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

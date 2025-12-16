@@ -49,10 +49,12 @@ export default function RootLayout({
               (function() {
                 try {
                   var theme = localStorage.getItem('theme');
-                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
                   } else if (theme === 'light') {
                     document.documentElement.classList.add('light');
+                  } else if (theme === 'girly') {
+                    document.documentElement.classList.add('girly');
                   } else {
                     var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
                     document.documentElement.classList.add(systemTheme);

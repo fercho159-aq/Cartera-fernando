@@ -13,6 +13,7 @@ import {
     Moon,
     Sun,
     Monitor,
+    Heart,
     ChevronRight,
     Check,
     X,
@@ -87,6 +88,7 @@ export default function SettingsPage() {
     const themeOptions = [
         { value: "light" as const, label: "Claro", icon: Sun },
         { value: "dark" as const, label: "Oscuro", icon: Moon },
+        { value: "girly" as const, label: "Rosa", icon: Heart },
         { value: "system" as const, label: "Sistema", icon: Monitor },
     ];
 
@@ -153,7 +155,7 @@ export default function SettingsPage() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="grid grid-cols-4 gap-2">
                             {themeOptions.map((option) => {
                                 const isActive = theme === option.value;
                                 const Icon = option.icon;
@@ -175,7 +177,7 @@ export default function SettingsPage() {
                             })}
                         </div>
                         <p className="text-xs text-muted-foreground mt-3 text-center">
-                            Tema actual: {resolvedTheme === "dark" ? "🌙 Oscuro" : "☀️ Claro"}
+                            Tema actual: {resolvedTheme === "dark" ? "🌙 Oscuro" : resolvedTheme === "girly" ? "💖 Rosa" : "☀️ Claro"}
                         </p>
                     </CardContent>
                 </Card>
