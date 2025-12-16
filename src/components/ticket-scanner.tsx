@@ -2,8 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, X, Loader2, Check, RotateCcw, ImageIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Camera, X, Loader2, Check, RotateCcw, ImageIcon } from "lucide-react";
 
 interface TicketData {
   amount: number;
@@ -23,14 +22,13 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<TicketData | null>(null);
-  
-  const cameraInputRef = useRef<HTMLInputElement>(null);
-  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const handleImageCapture = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setError(null);
+      
+      // Comprimir imagen si es muy grande
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
@@ -41,8 +39,6 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
       };
       reader.readAsDataURL(file);
     }
-    // Reset input para permitir seleccionar la misma imagen
-    event.target.value = '';
   }, []);
 
   const processImage = useCallback(async () => {
@@ -98,16 +94,15 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
     };
 
     return (
-      <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
+      <div className="fixed inset-0 z-[100] bg-background flex flex-col">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold">Ticket Escaneado ✅</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-muted">
             <X className="w-5 h-5" />
-          </Button>
+          </button>
         </div>
 
         <div className="flex-1 overflow-auto p-4">
-          {/* Preview de la imagen */}
           <div className="relative w-full max-w-sm mx-auto mb-6">
             <img
               src={capturedImage!}
@@ -116,13 +111,12 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
             />
             <div className="absolute top-2 right-2 bg-green-500 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
               <Check className="w-3 h-3" />
-              {Math.round(scanResult.confidence * 100)}% confianza
+              {Math.round(scanResult.confidence * 100)}%
             </div>
           </div>
 
-          {/* Datos extraídos */}
-          <div className="bg-card rounded-xl p-4 space-y-4 max-w-sm mx-auto shadow-lg">
-            <h3 className="font-semibold text-center mb-4">Datos detectados:</h3>
+          <div className="bg-card rounded-xl p-4 space-y-4 max-w-sm mx-auto shadow-lg border">
+            <h3 className="font-semibold text-center">Datos detectados:</h3>
 
             <div className="flex justify-between items-center py-2 border-b">
               <span className="text-muted-foreground">Monto</span>
@@ -133,7 +127,7 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
 
             <div className="flex justify-between items-center py-2 border-b">
               <span className="text-muted-foreground">Comercio</span>
-              <span className="font-medium text-right max-w-[60%] truncate">{scanResult.title}</span>
+              <span className="font-medium text-right max-w-[60%]">{scanResult.title}</span>
             </div>
 
             <div className="flex justify-between items-center py-2 border-b">
@@ -149,28 +143,34 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
         </div>
 
         <div className="p-4 border-t space-y-2 bg-background">
-          <Button onClick={confirmResult} className="w-full" size="lg">
-            <Check className="w-5 h-5 mr-2" />
-            Confirmar y Registrar Gasto
-          </Button>
-          <Button onClick={retryCapture} variant="outline" className="w-full">
-            <RotateCcw className="w-5 h-5 mr-2" />
-            Escanear Otro Ticket
-          </Button>
+          <button
+            onClick={confirmResult}
+            className="w-full h-14 text-lg font-semibold rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-2"
+          >
+            <Check className="w-5 h-5" />
+            Confirmar y Registrar
+          </button>
+          <button
+            onClick={retryCapture}
+            className="w-full h-12 rounded-xl border border-border flex items-center justify-center gap-2"
+          >
+            <RotateCcw className="w-5 h-5" />
+            Escanear Otro
+          </button>
         </div>
       </div>
     );
   }
 
-  // Render de captura/preview de imagen
+  // Render de preview de imagen capturada
   if (capturedImage) {
     return (
-      <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
+      <div className="fixed inset-0 z-[100] bg-background flex flex-col">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold">Revisar Imagen</h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-muted">
             <X className="w-5 h-5" />
-          </Button>
+          </button>
         </div>
 
         <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
@@ -182,47 +182,49 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
         </div>
 
         {error && (
-          <div className="mx-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm text-center">
+          <div className="mx-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm text-center">
             {error}
           </div>
         )}
 
         <div className="p-4 border-t space-y-2 bg-background">
-          <Button
+          <button
             onClick={processImage}
-            className="w-full"
-            size="lg"
             disabled={isProcessing}
+            className="w-full h-14 text-lg font-semibold rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isProcessing ? (
               <>
-                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Analizando ticket con IA...
+                <Loader2 className="w-5 h-5 animate-spin" />
+                Analizando con IA...
               </>
             ) : (
               <>
-                <Check className="w-5 h-5 mr-2" />
+                <Check className="w-5 h-5" />
                 Procesar Ticket
               </>
             )}
-          </Button>
-          <Button onClick={retryCapture} variant="outline" className="w-full">
-            <RotateCcw className="w-5 h-5 mr-2" />
-            Tomar Otra Foto
-          </Button>
+          </button>
+          <button
+            onClick={retryCapture}
+            className="w-full h-12 rounded-xl border border-border flex items-center justify-center gap-2"
+          >
+            <RotateCcw className="w-5 h-5" />
+            Otra Foto
+          </button>
         </div>
       </div>
     );
   }
 
-  // Render principal - selección de método de captura
+  // Render principal - selección de método
   return (
-    <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
+    <div className="fixed inset-0 z-[100] bg-background flex flex-col">
       <div className="flex items-center justify-between p-4 border-b">
         <h2 className="text-lg font-semibold">Escanear Ticket</h2>
-        <Button variant="ghost" size="icon" onClick={onClose}>
+        <button onClick={onClose} className="p-2 rounded-full hover:bg-muted">
           <X className="w-5 h-5" />
-        </Button>
+        </button>
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center p-6">
@@ -233,60 +235,50 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
           <div>
             <h3 className="text-xl font-semibold mb-2">Escanea tu ticket</h3>
             <p className="text-muted-foreground text-sm">
-              Toma una foto del ticket o selecciona una imagen de tu galería. La IA extraerá automáticamente el monto, fecha y comercio.
+              Toma una foto del ticket o selecciona una imagen. La IA extraerá el monto, fecha y comercio.
             </p>
           </div>
 
           {error && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm">
               {error}
             </div>
           )}
         </div>
-
-        {/* Inputs ocultos */}
-        <input
-          ref={cameraInputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={handleImageCapture}
-          className="hidden"
-        />
-        <input
-          ref={galleryInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageCapture}
-          className="hidden"
-        />
       </div>
 
       <div className="p-4 border-t space-y-3 bg-background">
-        <Button 
-          onClick={() => cameraInputRef.current?.click()} 
-          className="w-full h-14 text-lg"
-          size="lg"
-        >
-          <Camera className="w-6 h-6 mr-3" />
-          Tomar Foto
-        </Button>
-        <Button
-          onClick={() => galleryInputRef.current?.click()}
-          variant="outline"
-          className="w-full h-14 text-lg"
-          size="lg"
-        >
-          <ImageIcon className="w-6 h-6 mr-3" />
-          Elegir de Galería
-        </Button>
-        <Button
+        {/* Botón para cámara - usando label */}
+        <label className="w-full h-14 text-lg font-semibold rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-3 cursor-pointer active:opacity-80">
+          <Camera className="w-6 h-6" />
+          <span>Tomar Foto</span>
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleImageCapture}
+            className="hidden"
+          />
+        </label>
+
+        {/* Botón para galería - usando label */}
+        <label className="w-full h-14 text-lg rounded-xl border-2 border-border flex items-center justify-center gap-3 cursor-pointer active:opacity-80 bg-background">
+          <ImageIcon className="w-6 h-6" />
+          <span>Elegir de Galería</span>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleImageCapture}
+            className="hidden"
+          />
+        </label>
+
+        <button
           onClick={onClose}
-          variant="ghost"
-          className="w-full"
+          className="w-full h-12 text-muted-foreground"
         >
           Cancelar
-        </Button>
+        </button>
       </div>
     </div>
   );
