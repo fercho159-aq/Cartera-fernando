@@ -1,17 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { debts, NewDebt } from '@/lib/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, and } from 'drizzle-orm';
+import { getCurrentUserId } from '@/lib/auth-helpers';
 
 // Prevent static generation
 export const dynamic = 'force-dynamic';
 
-// GET - Obtener todas las deudas
+// GET - Obtener todas las deudas del usuario
 export async function GET() {
     try {
+        const userId = await getCurrentUserId();
+        if (!userId) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
         const result = await db
             .select()
             .from(debts)
+            .where(eq(debts.userId, userId))
             .orderBy(desc(debts.createdAt));
 
         return NextResponse.json(result);
@@ -27,9 +34,15 @@ export async function GET() {
 // POST - Crear nueva deuda
 export async function POST(request: NextRequest) {
     try {
+        const userId = await getCurrentUserId();
+        if (!userId) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
         const body = await request.json();
 
         const newDebt: NewDebt = {
+            userId,
             personName: body.personName,
             amount: body.amount,
             description: body.description || null,

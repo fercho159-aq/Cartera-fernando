@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { transactions, NewTransaction } from '@/lib/db/schema';
-import { desc, gte, and, sql } from 'drizzle-orm';
+import { desc, gte, and, sql, eq } from 'drizzle-orm';
 import { addDays, addWeeks, addMonths } from 'date-fns';
+import { getCurrentUserId } from '@/lib/auth-helpers';
 
 // Prevent static generation - this route needs runtime access to database
 export const dynamic = 'force-dynamic';
@@ -23,17 +24,27 @@ function calculateNextOccurrence(date: Date, period: string): Date | null {
 
 export async function GET() {
     try {
-        // First, process recurring transactions
-        await processRecurringTransactions();
+        const userId = await getCurrentUserId();
+        if (!userId) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
 
-        // Get transactions from the last 6 months
+        // First, process recurring transactions for this user
+        await processRecurringTransactions(userId);
+
+        // Get transactions from the last 6 months for this user
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
         const result = await db
             .select()
             .from(transactions)
-            .where(gte(transactions.date, sixMonthsAgo))
+            .where(
+                and(
+                    eq(transactions.userId, userId),
+                    gte(transactions.date, sixMonthsAgo)
+                )
+            )
             .orderBy(desc(transactions.date));
 
         return NextResponse.json(result);
@@ -48,9 +59,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
     try {
+        const userId = await getCurrentUserId();
+        if (!userId) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
         const body = await request.json();
 
         const newTransaction: NewTransaction = {
+            userId,
             amount: body.amount,
             title: body.title,
             type: body.type,
@@ -78,16 +95,17 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// Process recurring transactions
-async function processRecurringTransactions() {
+// Process recurring transactions for a specific user
+async function processRecurringTransactions(userId: number) {
     const now = new Date();
 
-    // Find recurring transactions that need to be processed
+    // Find recurring transactions that need to be processed for this user
     const recurringToProcess = await db
         .select()
         .from(transactions)
         .where(
             and(
+                eq(transactions.userId, userId),
                 sql`${transactions.isRecurring} = true`,
                 sql`${transactions.nextOccurrence} <= ${now}`
             )
@@ -96,6 +114,7 @@ async function processRecurringTransactions() {
     for (const transaction of recurringToProcess) {
         // Create new transaction instance
         const newTransaction: NewTransaction = {
+            userId,
             amount: transaction.amount,
             title: transaction.title,
             type: transaction.type,

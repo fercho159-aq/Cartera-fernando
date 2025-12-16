@@ -11,6 +11,11 @@ export function BottomNav() {
     const pathname = usePathname();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+    // Ocultar nav en páginas de login y registro
+    if (pathname === "/login" || pathname === "/register") {
+        return null;
+    }
+
     const navItems = [
         { href: "/", icon: Home, label: "Inicio" },
         { href: "/stats", icon: BarChart3, label: "Stats" },

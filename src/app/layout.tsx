@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { BottomNav } from "@/components/bottom-nav";
 import { NotificationProvider } from "@/components/notification-provider";
+import { AuthProvider } from "@/components/auth-provider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -48,11 +49,13 @@ export default function RootLayout({
       <body
         className={`${inter.variable} font-sans antialiased bg-background text-foreground min-h-screen pb-24 pt-safe`}
       >
-        <NotificationProvider />
-        <div className="pt-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' }}>
-          {children}
-        </div>
-        <BottomNav />
+        <AuthProvider>
+          <NotificationProvider />
+          <div className="pt-4" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 0.5rem)' }}>
+            {children}
+          </div>
+          <BottomNav />
+        </AuthProvider>
       </body>
     </html>
   );

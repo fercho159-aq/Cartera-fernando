@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { transactions } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
+import { getCurrentUserId } from '@/lib/auth-helpers';
 
 // Prevent static generation - this route needs runtime access to database
 export const dynamic = 'force-dynamic';
@@ -11,6 +12,11 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const userId = await getCurrentUserId();
+        if (!userId) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
         const { id } = await params;
         const transactionId = parseInt(id, 10);
 
@@ -21,10 +27,15 @@ export async function DELETE(
             );
         }
 
-        // Delete the transaction
+        // Delete the transaction only if it belongs to the user
         const result = await db
             .delete(transactions)
-            .where(eq(transactions.id, transactionId))
+            .where(
+                and(
+                    eq(transactions.id, transactionId),
+                    eq(transactions.userId, userId)
+                )
+            )
             .returning();
 
         if (result.length === 0) {

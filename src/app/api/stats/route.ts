@@ -1,17 +1,23 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { transactions } from '@/lib/db/schema';
-import { sql, gte } from 'drizzle-orm';
+import { sql, gte, eq, and } from 'drizzle-orm';
+import { getCurrentUserId } from '@/lib/auth-helpers';
 
 // Prevent static generation - this route needs runtime access to database
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
+        const userId = await getCurrentUserId();
+        if (!userId) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-        // Get monthly aggregated data for the last 6 months
+        // Get monthly aggregated data for the last 6 months for this user
         const result = await db
             .select({
                 month: sql<string>`TO_CHAR(${transactions.date}, 'Mon')`,
@@ -21,7 +27,12 @@ export async function GET() {
                 expense: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.type} = 'expense' THEN ${transactions.amount}::numeric ELSE 0 END), 0)`,
             })
             .from(transactions)
-            .where(gte(transactions.date, sixMonthsAgo))
+            .where(
+                and(
+                    eq(transactions.userId, userId),
+                    gte(transactions.date, sixMonthsAgo)
+                )
+            )
             .groupBy(
                 sql`TO_CHAR(${transactions.date}, 'Mon')`,
                 sql`EXTRACT(MONTH FROM ${transactions.date})`,
@@ -32,7 +43,7 @@ export async function GET() {
                 sql`EXTRACT(MONTH FROM ${transactions.date})`
             );
 
-        // Get category breakdown for current month
+        // Get category breakdown for current month for this user
         const now = new Date();
         const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
@@ -43,7 +54,10 @@ export async function GET() {
             })
             .from(transactions)
             .where(
-                sql`${transactions.date} >= ${firstDayOfMonth} AND ${transactions.type} = 'expense'`
+                and(
+                    eq(transactions.userId, userId),
+                    sql`${transactions.date} >= ${firstDayOfMonth} AND ${transactions.type} = 'expense'`
+                )
             )
             .groupBy(transactions.category);
 

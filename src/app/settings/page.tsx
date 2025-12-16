@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession, signOut } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,14 +13,19 @@ import {
     Moon,
     ChevronRight,
     Check,
-    X
+    X,
+    User,
+    LogOut,
+    Loader2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
+    const { data: session } = useSession();
     const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
     const [isInstallable, setIsInstallable] = useState(false);
     const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     useEffect(() => {
         // Verificar permisos de notificación
@@ -68,6 +74,11 @@ export default function SettingsPage() {
         }
     };
 
+    const handleLogout = async () => {
+        setIsLoggingOut(true);
+        await signOut({ callbackUrl: "/login" });
+    };
+
     return (
         <main className="min-h-screen px-4 pt-6 pb-24">
             <header className="mb-6">
@@ -78,6 +89,50 @@ export default function SettingsPage() {
             </header>
 
             <div className="space-y-4">
+                {/* Cuenta de Usuario */}
+                <Card className="border-0 bg-card">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <User className="w-5 h-5" />
+                            Mi Cuenta
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <div className="flex items-center gap-4 p-3 rounded-xl bg-muted">
+                            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center">
+                                <User className="w-6 h-6 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <p className="font-semibold truncate">
+                                    {session?.user?.name || "Usuario"}
+                                </p>
+                                <p className="text-sm text-muted-foreground truncate">
+                                    {session?.user?.email}
+                                </p>
+                            </div>
+                        </div>
+                        
+                        <Button
+                            onClick={handleLogout}
+                            variant="destructive"
+                            className="w-full"
+                            disabled={isLoggingOut}
+                        >
+                            {isLoggingOut ? (
+                                <>
+                                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                    Cerrando sesión...
+                                </>
+                            ) : (
+                                <>
+                                    <LogOut className="w-4 h-4 mr-2" />
+                                    Cerrar Sesión
+                                </>
+                            )}
+                        </Button>
+                    </CardContent>
+                </Card>
+
                 {/* Instalar App */}
                 {isInstallable && (
                     <Card className="border-0 bg-gradient-to-r from-primary/20 to-primary/5">
@@ -223,3 +278,4 @@ export default function SettingsPage() {
         </main>
     );
 }
+

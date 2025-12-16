@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { debts } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
+import { getCurrentUserId } from '@/lib/auth-helpers';
 
 // Prevent static generation
 export const dynamic = 'force-dynamic';
@@ -12,6 +13,11 @@ export async function PATCH(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const userId = await getCurrentUserId();
+        if (!userId) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
         const { id } = await params;
         const debtId = parseInt(id, 10);
         const body = await request.json();
@@ -30,10 +36,16 @@ export async function PATCH(
             updateData.paidDate = body.isPaid ? new Date() : null;
         }
 
+        // Update only if the debt belongs to the user
         const result = await db
             .update(debts)
             .set(updateData)
-            .where(eq(debts.id, debtId))
+            .where(
+                and(
+                    eq(debts.id, debtId),
+                    eq(debts.userId, userId)
+                )
+            )
             .returning();
 
         if (result.length === 0) {
@@ -59,6 +71,11 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const userId = await getCurrentUserId();
+        if (!userId) {
+            return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
+        }
+
         const { id } = await params;
         const debtId = parseInt(id, 10);
 
@@ -69,9 +86,15 @@ export async function DELETE(
             );
         }
 
+        // Delete only if the debt belongs to the user
         const result = await db
             .delete(debts)
-            .where(eq(debts.id, debtId))
+            .where(
+                and(
+                    eq(debts.id, debtId),
+                    eq(debts.userId, userId)
+                )
+            )
             .returning();
 
         if (result.length === 0) {

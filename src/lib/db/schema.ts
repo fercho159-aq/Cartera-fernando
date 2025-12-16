@@ -1,4 +1,4 @@
-import { pgTable, serial, varchar, decimal, timestamp, boolean, pgEnum } from 'drizzle-orm/pg-core';
+import { pgTable, serial, varchar, decimal, timestamp, boolean, pgEnum, integer, text } from 'drizzle-orm/pg-core';
 
 // Enums
 export const transactionTypeEnum = pgEnum('transaction_type', ['income', 'expense']);
@@ -16,9 +16,19 @@ export const categoryEnum = pgEnum('category', [
   'other'
 ]);
 
+// Users table
+export const users = pgTable('users', {
+  id: serial('id').primaryKey(),
+  name: varchar('name', { length: 255 }),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  password: text('password').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 // Transactions table
 export const transactions = pgTable('transactions', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
   amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
   title: varchar('title', { length: 255 }).notNull(),
   type: transactionTypeEnum('type').notNull(),
@@ -34,6 +44,7 @@ export const transactions = pgTable('transactions', {
 // Debts/Debtors table - Para manejar personas que te deben dinero
 export const debts = pgTable('debts', {
   id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id).notNull(),
   personName: varchar('person_name', { length: 255 }).notNull(),
   amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
   description: varchar('description', { length: 500 }),
@@ -44,6 +55,8 @@ export const debts = pgTable('debts', {
 });
 
 // Types
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
 export type Transaction = typeof transactions.$inferSelect;
 export type NewTransaction = typeof transactions.$inferInsert;
 export type Debt = typeof debts.$inferSelect;
