@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, Upload, X, Loader2, Check, RotateCcw } from "lucide-react";
+import { Camera, Upload, X, Loader2, Check, RotateCcw, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TicketData {
@@ -19,70 +19,30 @@ interface TicketScannerProps {
 }
 
 export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
-  const [isCapturing, setIsCapturing] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<TicketData | null>(null);
   
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
-  const startCamera = useCallback(async () => {
-    try {
-      setError(null);
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        setIsCapturing(true);
-      }
-    } catch (err) {
-      console.error("Error accessing camera:", err);
-      setError("No se pudo acceder a la cámara. Por favor, permite el acceso o sube una imagen.");
-    }
-  }, []);
-
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-    setIsCapturing(false);
-  }, []);
-
-  const capturePhoto = useCallback(() => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.drawImage(video, 0, 0);
-        const imageData = canvas.toDataURL("image/jpeg", 0.8);
-        setCapturedImage(imageData);
-        stopCamera();
-      }
-    }
-  }, [stopCamera]);
-
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageCapture = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setError(null);
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
         setCapturedImage(result);
       };
+      reader.onerror = () => {
+        setError("Error al leer la imagen. Intenta de nuevo.");
+      };
       reader.readAsDataURL(file);
     }
+    // Reset input para permitir seleccionar la misma imagen
+    event.target.value = '';
   }, []);
 
   const processImage = useCallback(async () => {
@@ -107,7 +67,7 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
       setScanResult(result.data);
     } catch (err) {
       console.error("Error processing ticket:", err);
-      setError("Error al procesar el ticket. Intenta de nuevo.");
+      setError("Error al procesar el ticket. Verifica que la imagen sea clara y vuelve a intentar.");
     } finally {
       setIsProcessing(false);
     }
@@ -125,11 +85,6 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
     setError(null);
   }, []);
 
-  const handleClose = useCallback(() => {
-    stopCamera();
-    onClose();
-  }, [stopCamera, onClose]);
-
   // Render de resultados del escaneo
   if (scanResult) {
     const categoryLabels: Record<string, string> = {
@@ -145,8 +100,8 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
     return (
       <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
         <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-lg font-semibold">Ticket Escaneado</h2>
-          <Button variant="ghost" size="icon" onClick={handleClose}>
+          <h2 className="text-lg font-semibold">Ticket Escaneado ✅</h2>
+          <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="w-5 h-5" />
           </Button>
         </div>
@@ -166,7 +121,7 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
           </div>
 
           {/* Datos extraídos */}
-          <div className="bg-card rounded-xl p-4 space-y-4 max-w-sm mx-auto">
+          <div className="bg-card rounded-xl p-4 space-y-4 max-w-sm mx-auto shadow-lg">
             <h3 className="font-semibold text-center mb-4">Datos detectados:</h3>
 
             <div className="flex justify-between items-center py-2 border-b">
@@ -178,7 +133,7 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
 
             <div className="flex justify-between items-center py-2 border-b">
               <span className="text-muted-foreground">Comercio</span>
-              <span className="font-medium">{scanResult.title}</span>
+              <span className="font-medium text-right max-w-[60%] truncate">{scanResult.title}</span>
             </div>
 
             <div className="flex justify-between items-center py-2 border-b">
@@ -193,7 +148,7 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
           </div>
         </div>
 
-        <div className="p-4 border-t space-y-2">
+        <div className="p-4 border-t space-y-2 bg-background">
           <Button onClick={confirmResult} className="w-full" size="lg">
             <Check className="w-5 h-5 mr-2" />
             Confirmar y Registrar Gasto
@@ -213,16 +168,16 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
       <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-lg font-semibold">Revisar Imagen</h2>
-          <Button variant="ghost" size="icon" onClick={handleClose}>
+          <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="w-5 h-5" />
           </Button>
         </div>
 
-        <div className="flex-1 flex items-center justify-center p-4">
+        <div className="flex-1 flex items-center justify-center p-4 overflow-auto">
           <img
             src={capturedImage}
             alt="Ticket capturado"
-            className="max-w-full max-h-full rounded-xl shadow-lg"
+            className="max-w-full max-h-full rounded-xl shadow-lg object-contain"
           />
         </div>
 
@@ -232,7 +187,7 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
           </div>
         )}
 
-        <div className="p-4 border-t space-y-2">
+        <div className="p-4 border-t space-y-2 bg-background">
           <Button
             onClick={processImage}
             className="w-full"
@@ -242,7 +197,7 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
             {isProcessing ? (
               <>
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                Analizando ticket...
+                Analizando ticket con IA...
               </>
             ) : (
               <>
@@ -260,87 +215,78 @@ export function TicketScanner({ onScanComplete, onClose }: TicketScannerProps) {
     );
   }
 
-  // Render de captura con cámara o subida
+  // Render principal - selección de método de captura
   return (
     <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm flex flex-col">
       <div className="flex items-center justify-between p-4 border-b">
         <h2 className="text-lg font-semibold">Escanear Ticket</h2>
-        <Button variant="ghost" size="icon" onClick={handleClose}>
+        <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="w-5 h-5" />
         </Button>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-4">
-        {isCapturing ? (
-          <div className="relative w-full max-w-md">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="w-full rounded-xl shadow-lg"
-            />
-            <div className="absolute inset-0 border-4 border-primary/50 rounded-xl pointer-events-none" />
-            <p className="text-center mt-4 text-sm text-muted-foreground">
-              Centra el ticket en el recuadro
+      <div className="flex-1 flex flex-col items-center justify-center p-6">
+        <div className="text-center space-y-6 max-w-sm">
+          <div className="w-32 h-32 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+            <Camera className="w-16 h-16 text-primary" />
+          </div>
+          <div>
+            <h3 className="text-xl font-semibold mb-2">Escanea tu ticket</h3>
+            <p className="text-muted-foreground text-sm">
+              Toma una foto del ticket o selecciona una imagen de tu galería. La IA extraerá automáticamente el monto, fecha y comercio.
             </p>
           </div>
-        ) : (
-          <div className="text-center space-y-6">
-            <div className="w-32 h-32 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-              <Camera className="w-16 h-16 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">Escanea tu ticket</h3>
-              <p className="text-muted-foreground text-sm">
-                Toma una foto o sube una imagen del ticket para registrar el gasto automáticamente
-              </p>
-            </div>
-          </div>
-        )}
 
-        {error && (
-          <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm text-center max-w-md">
-            {error}
-          </div>
-        )}
+          {error && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
+              {error}
+            </div>
+          )}
+        </div>
 
-        <canvas ref={canvasRef} className="hidden" />
+        {/* Inputs ocultos */}
         <input
-          ref={fileInputRef}
+          ref={cameraInputRef}
           type="file"
           accept="image/*"
-          onChange={handleFileUpload}
+          capture="environment"
+          onChange={handleImageCapture}
+          className="hidden"
+        />
+        <input
+          ref={galleryInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageCapture}
           className="hidden"
         />
       </div>
 
-      <div className="p-4 border-t space-y-2">
-        {isCapturing ? (
-          <>
-            <Button onClick={capturePhoto} className="w-full" size="lg">
-              <Camera className="w-5 h-5 mr-2" />
-              Tomar Foto
-            </Button>
-            <Button onClick={stopCamera} variant="outline" className="w-full">
-              Cancelar
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button onClick={startCamera} className="w-full" size="lg">
-              <Camera className="w-5 h-5 mr-2" />
-              Abrir Cámara
-            </Button>
-            <Button
-              onClick={() => fileInputRef.current?.click()}
-              variant="outline"
-              className="w-full"
-            >
-              <Upload className="w-5 h-5 mr-2" />
-              Subir Imagen
-            </Button>
-          </>
-        )}
+      <div className="p-4 border-t space-y-3 bg-background">
+        <Button 
+          onClick={() => cameraInputRef.current?.click()} 
+          className="w-full h-14 text-lg"
+          size="lg"
+        >
+          <Camera className="w-6 h-6 mr-3" />
+          Tomar Foto
+        </Button>
+        <Button
+          onClick={() => galleryInputRef.current?.click()}
+          variant="outline"
+          className="w-full h-14 text-lg"
+          size="lg"
+        >
+          <ImageIcon className="w-6 h-6 mr-3" />
+          Elegir de Galería
+        </Button>
+        <Button
+          onClick={onClose}
+          variant="ghost"
+          className="w-full"
+        >
+          Cancelar
+        </Button>
       </div>
     </div>
   );
