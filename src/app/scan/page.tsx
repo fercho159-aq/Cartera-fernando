@@ -45,54 +45,74 @@ const compressImage = (base64: string, maxWidth = 1024, quality = 0.8): Promise<
 
 // Función para extraer datos del texto OCR
 const extractTicketData = (text: string): TicketData => {
-  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const originalLines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const lines = [...originalLines]; // Copia para no mutar
   
-  // Buscar el total
+  console.log('Texto OCR detectado:', text);
+  
+  // Buscar el total - buscar específicamente líneas con "Total"
   let amount = 0;
-  const totalPatterns = [
-    /total[:\s]*\$?\s*([\d,]+\.?\d*)/i,
-    /importe[:\s]*\$?\s*([\d,]+\.?\d*)/i,
-    /monto[:\s]*\$?\s*([\d,]+\.?\d*)/i,
-    /\$\s*([\d,]+\.?\d*)/,
-    /([\d,]+\.\d{2})\s*(?:mxn|pesos)?/i,
-  ];
-
-  for (const pattern of totalPatterns) {
-    for (const line of lines.reverse()) {
-      const match = line.match(pattern);
-      if (match) {
-        const numStr = match[1].replace(/,/g, '');
-        const num = parseFloat(numStr);
-        if (num > amount && num < 100000) {
-          amount = num;
-        }
+  
+  // Primero buscar líneas que contengan "Total" explícitamente
+  for (const line of lines) {
+    const totalMatch = line.match(/total[:\s]*\$?\s*([\d,\.]+)/i);
+    if (totalMatch) {
+      const numStr = totalMatch[1].replace(/,/g, '').replace(/\.(?=.*\.)/g, '');
+      const num = parseFloat(numStr);
+      if (num > 10 && num < 100000) {
+        amount = num;
+        console.log('Monto encontrado en Total:', num, 'de línea:', line);
       }
     }
   }
+  
+  // Si no encontramos con "Total", buscar el número más grande que parezca precio
+  if (amount === 0) {
+    const pricePattern = /\$?\s*([\d,]+\.?\d{0,2})\s*(?:mxn|pesos|mn)?/gi;
+    let maxPrice = 0;
+    
+    for (const line of lines) {
+      let match;
+      while ((match = pricePattern.exec(line)) !== null) {
+        const numStr = match[1].replace(/,/g, '');
+        const num = parseFloat(numStr);
+        if (num > maxPrice && num > 10 && num < 100000) {
+          maxPrice = num;
+        }
+      }
+    }
+    amount = maxPrice;
+    console.log('Monto más grande encontrado:', amount);
+  }
 
-  // Buscar fecha
+  // Buscar fecha - mejorado para más formatos
   let date = new Date().toISOString().split('T')[0];
   const datePatterns = [
-    /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/,
-    /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,
+    /fecha[:\s]*([\d]{1,2})[\.\/\-]([\d]{1,2})[\.\/\-]([\d]{2,4})/i,
+    /date[:\s]*([\d]{1,2})[\.\/\-]([\d]{1,2})[\.\/\-]([\d]{2,4})/i,
+    /([\d]{1,2})[\.\/\-]([\d]{1,2})[\.\/\-]([\d]{4})/,
+    /([\d]{1,2})[\.\/\-]([\d]{1,2})[\.\/\-]([\d]{2})\b/,
   ];
 
-  for (const line of lines) {
+  for (const line of originalLines) {
     for (const pattern of datePatterns) {
       const match = line.match(pattern);
       if (match) {
         try {
-          if (match[1].length === 4) {
-            // YYYY-MM-DD
-            date = `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`;
-          } else if (match[3].length === 4) {
-            // DD-MM-YYYY
-            date = `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
-          } else {
-            // DD-MM-YY
-            const year = parseInt(match[3]) > 50 ? `19${match[3]}` : `20${match[3]}`;
-            date = `${year}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
+          let day = match[1];
+          let month = match[2];
+          let year = match[3];
+          
+          // Si el primer grupo tiene más de 2 dígitos y parece "fecha:", ajustar
+          if (day.length > 2) continue;
+          
+          // Normalizar año
+          if (year.length === 2) {
+            year = parseInt(year) > 50 ? `19${year}` : `20${year}`;
           }
+          
+          date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+          console.log('Fecha encontrada:', date, 'de línea:', line);
           break;
         } catch {
           continue;
@@ -101,29 +121,43 @@ const extractTicketData = (text: string): TicketData => {
     }
   }
 
-  // Determinar categoría por palabras clave
+  // Determinar categoría por palabras clave - ampliado
   const textLower = text.toLowerCase();
   let category = 'other';
   
-  if (/restaurante|comida|pizza|burger|tacos|cafe|coffee|starbucks|oxxo|seven|tienda/i.test(textLower)) {
+  // Comida - ampliado con más palabras
+  if (/sushi|restaurante|restaurant|comida|pizza|burger|tacos|taco|cafe|café|coffee|starbucks|oxxo|seven|tienda|pollo|carne|mariscos|antojitos|cocina|food|kitchen|burritos|tortas/i.test(textLower)) {
     category = 'food';
-  } else if (/uber|didi|taxi|gasolina|gas|pemex/i.test(textLower)) {
+  } else if (/uber|didi|taxi|gasolina|gas|pemex|estacionamiento|parking|metro|autobus|bus/i.test(textLower)) {
     category = 'transport';
-  } else if (/cine|netflix|spotify|juego|game/i.test(textLower)) {
+  } else if (/cine|cinemex|cinepolis|netflix|spotify|juego|game|teatro|concierto|boleto/i.test(textLower)) {
     category = 'entertainment';
-  } else if (/farmacia|hospital|doctor|medic|salud/i.test(textLower)) {
+  } else if (/farmacia|hospital|doctor|medic|salud|guadalajara|benavides|similares|consultorio/i.test(textLower)) {
     category = 'health';
-  } else if (/walmart|soriana|chedraui|liverpool|palacio|amazon|mercado libre/i.test(textLower)) {
+  } else if (/walmart|soriana|chedraui|liverpool|palacio|amazon|mercado libre|costco|sams|heb|bodega/i.test(textLower)) {
     category = 'shopping';
-  } else if (/luz|agua|telmex|internet|telefono|cfe/i.test(textLower)) {
+  } else if (/luz|agua|telmex|internet|telefono|cfe|recibo|servicio|telcel|izzi|megacable/i.test(textLower)) {
     category = 'utilities';
   }
+  
+  console.log('Categoría detectada:', category);
 
-  // Extraer título (primera línea significativa o nombre del negocio)
+  // Extraer título - buscar nombre del negocio (primera línea con letras mayúsculas)
   let title = 'Compra';
-  for (const line of lines) {
-    if (line.length > 3 && line.length < 50 && !/^\d+$/.test(line) && !/total|fecha|hora|rfc/i.test(line)) {
-      title = line.substring(0, 40);
+  
+  // Primero buscar una línea que parezca nombre de negocio
+  for (const line of originalLines.slice(0, 5)) { // Solo primeras 5 líneas
+    const cleanLine = line.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').trim();
+    
+    // Debe tener al menos 3 caracteres, no ser solo números, no contener palabras reservadas
+    if (
+      cleanLine.length >= 3 && 
+      cleanLine.length <= 40 &&
+      /[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,}/i.test(cleanLine) &&
+      !/total|subtotal|fecha|hora|rfc|folio|ticket|recibo|iva|cambio|efectivo|tarjeta|cliente/i.test(cleanLine)
+    ) {
+      title = cleanLine.substring(0, 35);
+      console.log('Título encontrado:', title);
       break;
     }
   }
