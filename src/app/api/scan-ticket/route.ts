@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'models/gemini-1.5-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-8b' });
 
     const prompt = `Analiza esta imagen de un ticket o recibo de compra y extrae la siguiente información en formato JSON.
 
@@ -70,7 +70,7 @@ Si no puedes leer algún dato, usa valores por defecto razonables:
 
 Recuerda: responde SOLO con el JSON, sin explicaciones.`;
 
-    console.log('Enviando imagen a Gemini...');
+    console.log('Enviando imagen a Gemini con modelo:', 'gemini-1.5-flash-8b');
     
     const result = await model.generateContent([
       prompt,
