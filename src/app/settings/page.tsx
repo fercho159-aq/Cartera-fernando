@@ -20,10 +20,12 @@ import {
     User,
     LogOut,
     Loader2,
-    Palette
+    Palette,
+    Users
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme-provider";
+import Link from "next/link";
 
 export default function SettingsPage() {
     const { data: session } = useSession();
@@ -124,7 +126,7 @@ export default function SettingsPage() {
                                 </p>
                             </div>
                         </div>
-                        
+
                         <Button
                             onClick={handleLogout}
                             variant="destructive"
@@ -143,6 +145,26 @@ export default function SettingsPage() {
                                 </>
                             )}
                         </Button>
+                    </CardContent>
+                </Card>
+
+                {/* Cuentas Compartidas */}
+                <Card className="border-0 bg-card shadow-sm">
+                    <CardContent className="p-4">
+                        <Link href="/accounts" className="flex items-center justify-between w-full">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                                    <Users className="w-5 h-5 text-primary" />
+                                </div>
+                                <div>
+                                    <p className="font-medium">Cuentas Compartidas</p>
+                                    <p className="text-sm text-muted-foreground">
+                                        Comparte finanzas con otros
+                                    </p>
+                                </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        </Link>
                     </CardContent>
                 </Card>
 

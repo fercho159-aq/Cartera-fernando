@@ -22,7 +22,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTransactionStore } from "@/lib/store";
+import { useAccountStore } from "@/lib/account-store";
 import { VoiceInput } from "./voice-input";
+import { Users } from "lucide-react";
 
 
 const categories = [
@@ -54,7 +56,7 @@ interface AddTransactionSheetProps {
 function ScanDataLoader({ onDataLoaded }: { onDataLoaded: (data: { amount: string; title: string; category: string; date: string }) => void }) {
     const searchParams = useSearchParams();
     const router = useRouter();
-    
+
     useEffect(() => {
         const fromScan = searchParams.get('fromScan');
         if (fromScan === 'true') {
@@ -76,13 +78,15 @@ function ScanDataLoader({ onDataLoaded }: { onDataLoaded: (data: { amount: strin
             }
         }
     }, [searchParams, onDataLoaded, router]);
-    
+
     return null;
 }
 
 export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetProps) {
     const router = useRouter();
     const { addTransaction } = useTransactionStore();
+    const { activeAccountId, getActiveAccount } = useAccountStore();
+    const activeAccount = getActiveAccount();
 
     const [type, setType] = useState<"income" | "expense">("expense");
     const [amount, setAmount] = useState("");
@@ -131,6 +135,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                     date,
                     isRecurring: recurrence !== "none",
                     recurrencePeriod: recurrence,
+                    accountId: activeAccountId,
                 }),
             });
 
@@ -165,11 +170,17 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
             <Suspense fallback={null}>
                 <ScanDataLoader onDataLoaded={handleScanDataLoaded} />
             </Suspense>
-            
+
             <Sheet open={open} onOpenChange={onOpenChange}>
                 <SheetContent side="bottom" className="h-[85vh] rounded-t-3xl px-6 pb-8 overflow-y-auto">
                     <SheetHeader className="pb-4">
                         <SheetTitle className="text-xl">Agregar Transacción</SheetTitle>
+                        {activeAccount && (
+                            <div className="flex items-center gap-2 mt-2 p-2 rounded-lg bg-primary/10 text-sm">
+                                <Users className="w-4 h-4 text-primary" />
+                                <span>Agregando a: <strong>{activeAccount.name}</strong></span>
+                            </div>
+                        )}
                     </SheetHeader>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -185,8 +196,8 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                                 📸 Escanear Ticket
                             </Button>
 
-                            <VoiceInput 
-                                onResult={handleVoiceResult} 
+                            <VoiceInput
+                                onResult={handleVoiceResult}
                                 onError={handleVoiceError}
                             />
 

@@ -35,8 +35,13 @@ import {
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useAccountStore } from "@/lib/account-store";
+import { AccountSelector } from "@/components/account-selector";
+import Link from "next/link";
 
 export default function DebtsPage() {
+    const { activeAccountId, getActiveAccount } = useAccountStore();
+    const activeAccount = getActiveAccount();
     const [debts, setDebts] = useState<Debt[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -55,11 +60,13 @@ export default function DebtsPage() {
 
     useEffect(() => {
         fetchDebts();
-    }, []);
+    }, [activeAccountId]);
 
     const fetchDebts = async () => {
+        setIsLoading(true);
         try {
-            const response = await fetch("/api/debts");
+            const accountQuery = activeAccountId ? `?accountId=${activeAccountId}` : '';
+            const response = await fetch(`/api/debts${accountQuery}`);
             if (response.ok) {
                 const data = await response.json();
                 setDebts(data);
@@ -85,6 +92,7 @@ export default function DebtsPage() {
                     amount: parseFloat(amount),
                     description: description || null,
                     dueDate: dueDate || null,
+                    accountId: activeAccountId,
                 }),
             });
 
@@ -160,12 +168,36 @@ export default function DebtsPage() {
 
     return (
         <main className="min-h-screen px-4 pt-2 pb-24">
-            <header className="mb-6">
-                <h1 className="text-2xl font-bold">Deudores</h1>
-                <p className="text-muted-foreground text-sm mt-1">
-                    Personas que te deben dinero
-                </p>
+            <header className="flex items-center justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold">Deudores</h1>
+                    <p className="text-muted-foreground text-sm mt-1">
+                        {activeAccount ? activeAccount.name : "Personas que te deben dinero"}
+                    </p>
+                </div>
+                <AccountSelector />
             </header>
+
+            {/* Indicador de cuenta compartida */}
+            {activeAccount && (
+                <div className="mb-4 p-3 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-sm font-medium">Cuenta compartida</p>
+                        <p className="text-xs text-muted-foreground">
+                            Los deudores se sincronizan con todos los miembros
+                        </p>
+                    </div>
+                    <Link
+                        href="/accounts"
+                        className="text-xs text-primary hover:underline"
+                    >
+                        Gestionar
+                    </Link>
+                </div>
+            )}
 
             {/* Resumen */}
             <div className="grid grid-cols-3 gap-3 mb-6">

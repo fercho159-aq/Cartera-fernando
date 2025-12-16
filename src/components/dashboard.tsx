@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { StatCard } from "./stat-card";
 import { DailyBudgetCard } from "./daily-budget-card";
 import { CategoryChart } from "./category-chart";
 import { MonthlyChart } from "./monthly-chart";
 import { TransactionList } from "./transaction-list";
+import { AccountSelector } from "./account-selector";
 import { useTransactionStore } from "@/lib/store";
-import { Loader2, Bell, ChevronRight } from "lucide-react";
+import { useAccountStore } from "@/lib/account-store";
+import { Loader2, Bell, ChevronRight, Users } from "lucide-react";
 import Link from "next/link";
 
 interface Stats {
@@ -26,37 +28,41 @@ interface Stats {
 
 export function Dashboard() {
     const { transactions, setTransactions, isLoading, setLoading, getMonthlyStats } = useTransactionStore();
+    const { activeAccountId, getActiveAccount } = useAccountStore();
     const [stats, setStats] = useState<Stats | null>(null);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const [transactionsRes, statsRes] = await Promise.all([
-                    fetch("/api/transactions"),
-                    fetch("/api/stats"),
-                ]);
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const accountQuery = activeAccountId ? `?accountId=${activeAccountId}` : '';
 
-                if (transactionsRes.ok) {
-                    const transactionsData = await transactionsRes.json();
-                    setTransactions(transactionsData);
-                }
+            const [transactionsRes, statsRes] = await Promise.all([
+                fetch(`/api/transactions${accountQuery}`),
+                fetch(`/api/stats${accountQuery}`),
+            ]);
 
-                if (statsRes.ok) {
-                    const statsData = await statsRes.json();
-                    setStats(statsData);
-                }
-            } catch (error) {
-                console.error("Error al cargar datos:", error);
-            } finally {
-                setLoading(false);
+            if (transactionsRes.ok) {
+                const transactionsData = await transactionsRes.json();
+                setTransactions(transactionsData);
             }
-        };
 
+            if (statsRes.ok) {
+                const statsData = await statsRes.json();
+                setStats(statsData);
+            }
+        } catch (error) {
+            console.error("Error al cargar datos:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [setTransactions, setLoading, activeAccountId]);
+
+    useEffect(() => {
         fetchData();
-    }, [setTransactions, setLoading]);
+    }, [fetchData]);
 
     const monthlyStats = getMonthlyStats();
+    const activeAccount = getActiveAccount();
 
     if (isLoading) {
         return (
@@ -72,26 +78,52 @@ export function Dashboard() {
             <header className="flex items-center justify-between mb-6">
                 <div>
                     <p className="text-muted-foreground text-sm">Bienvenido de nuevo 👋</p>
-                    <h1 className="text-2xl font-bold mt-1">Tus Finanzas</h1>
+                    <h1 className="text-2xl font-bold mt-1">
+                        {activeAccount ? activeAccount.name : "Tus Finanzas"}
+                    </h1>
                 </div>
-                <button
-                    className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
-                    onClick={() => {
-                        if ("Notification" in window) {
-                            Notification.requestPermission().then((permission) => {
-                                if (permission === "granted") {
-                                    new Notification("🔔 ¡Notificaciones Activadas!", {
-                                        body: "Recibirás recordatorios diarios a las 8 PM",
-                                        icon: "/icon-192x192.png",
-                                    });
-                                }
-                            });
-                        }
-                    }}
-                >
-                    <Bell className="w-5 h-5 text-foreground" />
-                </button>
+                <div className="flex items-center gap-2">
+                    <AccountSelector />
+                    <button
+                        className="w-10 h-10 rounded-full bg-muted flex items-center justify-center"
+                        onClick={() => {
+                            if ("Notification" in window) {
+                                Notification.requestPermission().then((permission) => {
+                                    if (permission === "granted") {
+                                        new Notification("🔔 ¡Notificaciones Activadas!", {
+                                            body: "Recibirás recordatorios diarios a las 8 PM",
+                                            icon: "/icon-192x192.png",
+                                        });
+                                    }
+                                });
+                            }
+                        }}
+                    >
+                        <Bell className="w-5 h-5 text-foreground" />
+                    </button>
+                </div>
             </header>
+
+            {/* Indicador de cuenta compartida */}
+            {activeAccount && (
+                <div className="mb-4 p-3 rounded-xl bg-primary/10 border border-primary/20 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-sm font-medium">Cuenta compartida</p>
+                        <p className="text-xs text-muted-foreground">
+                            Los datos se sincronizan con todos los miembros
+                        </p>
+                    </div>
+                    <Link
+                        href="/accounts"
+                        className="text-xs text-primary hover:underline"
+                    >
+                        Gestionar
+                    </Link>
+                </div>
+            )}
 
             {/* Tarjetas de Resumen */}
             <div className="grid grid-cols-2 gap-3 mb-4">
@@ -144,3 +176,4 @@ export function Dashboard() {
         </main>
     );
 }
+

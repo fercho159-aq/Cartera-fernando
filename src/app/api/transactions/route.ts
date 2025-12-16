@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { transactions, NewTransaction } from '@/lib/db/schema';
+import { transactions, NewTransaction, accountMembers } from '@/lib/db/schema';
 import { desc, gte, and, sql, eq } from 'drizzle-orm';
 import { addDays, addWeeks, addMonths } from 'date-fns';
 import { getCurrentUserId } from '@/lib/auth-helpers';
@@ -22,29 +22,59 @@ function calculateNextOccurrence(date: Date, period: string): Date | null {
     }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
         const userId = await getCurrentUserId();
         if (!userId) {
             return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
         }
 
+        // Obtener accountId del query string
+        const { searchParams } = new URL(request.url);
+        const accountIdParam = searchParams.get('accountId');
+        const accountId = accountIdParam ? parseInt(accountIdParam, 10) : null;
+
+        // Si hay accountId, verificar que el usuario sea miembro
+        if (accountId) {
+            const [membership] = await db
+                .select()
+                .from(accountMembers)
+                .where(
+                    and(
+                        eq(accountMembers.accountId, accountId),
+                        eq(accountMembers.userId, userId)
+                    )
+                )
+                .limit(1);
+
+            if (!membership) {
+                return NextResponse.json({ error: 'No tienes acceso a esta cuenta' }, { status: 403 });
+            }
+        }
+
         // First, process recurring transactions for this user
         await processRecurringTransactions(userId);
 
-        // Get transactions from the last 6 months for this user
+        // Get transactions from the last 6 months
         const sixMonthsAgo = new Date();
         sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        // Construir condición de filtrado
+        const conditions = accountId
+            ? and(
+                eq(transactions.accountId, accountId),
+                gte(transactions.date, sixMonthsAgo)
+            )
+            : and(
+                eq(transactions.userId, userId),
+                sql`${transactions.accountId} IS NULL`, // Solo transacciones personales
+                gte(transactions.date, sixMonthsAgo)
+            );
 
         const result = await db
             .select()
             .from(transactions)
-            .where(
-                and(
-                    eq(transactions.userId, userId),
-                    gte(transactions.date, sixMonthsAgo)
-                )
-            )
+            .where(conditions)
             .orderBy(desc(transactions.date));
 
         return NextResponse.json(result);
@@ -66,8 +96,27 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json();
 
+        // Si hay accountId, verificar membresía
+        if (body.accountId) {
+            const [membership] = await db
+                .select()
+                .from(accountMembers)
+                .where(
+                    and(
+                        eq(accountMembers.accountId, body.accountId),
+                        eq(accountMembers.userId, userId)
+                    )
+                )
+                .limit(1);
+
+            if (!membership) {
+                return NextResponse.json({ error: 'No tienes acceso a esta cuenta' }, { status: 403 });
+            }
+        }
+
         const newTransaction: NewTransaction = {
             userId,
+            accountId: body.accountId || null,
             amount: body.amount,
             title: body.title,
             type: body.type,
