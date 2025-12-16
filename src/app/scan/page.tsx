@@ -407,23 +407,23 @@ export default function ScanPage() {
 
   // Pantalla principal de captura
   return (
-    <main className="min-h-screen bg-background flex flex-col">
-      <header className="flex items-center gap-4 p-4 border-b">
+    <main className="h-screen bg-background flex flex-col pb-20">
+      <header className="flex items-center gap-4 p-4 border-b shrink-0">
         <button onClick={goBack} className="p-2 rounded-full hover:bg-muted">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h1 className="text-lg font-semibold">Escanear Ticket</h1>
       </header>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
-        <div className="text-center space-y-6 max-w-sm">
-          <div className="w-32 h-32 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
-            <Camera className="w-16 h-16 text-primary" />
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-4">
+        <div className="text-center space-y-4 max-w-sm">
+          <div className="w-24 h-24 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+            <Camera className="w-12 h-12 text-primary" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold mb-2">Escanea tu ticket</h2>
+            <h2 className="text-xl font-semibold mb-1">Escanea tu ticket</h2>
             <p className="text-muted-foreground text-sm">
-              Toma una foto clara del ticket. El OCR extraerá el monto, fecha y comercio automáticamente.
+              Toma una foto clara del ticket para extraer los datos automáticamente.
             </p>
           </div>
           {error && (
@@ -434,7 +434,7 @@ export default function ScanPage() {
         </div>
       </div>
 
-      <div className="p-4 border-t space-y-3 bg-background pb-safe">
+      <div className="p-4 border-t space-y-3 bg-background shrink-0">
         <label className="w-full h-14 text-lg font-semibold rounded-xl bg-primary text-primary-foreground flex items-center justify-center gap-3 cursor-pointer active:opacity-80">
           <Camera className="w-6 h-6" />
           <span>Tomar Foto</span>
@@ -461,3 +461,4 @@ export default function ScanPage() {
     </main>
   );
 }
+
