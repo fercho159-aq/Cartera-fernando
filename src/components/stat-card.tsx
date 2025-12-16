@@ -1,6 +1,5 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,27 +28,62 @@ export function StatCard({ title, value, type, className }: StatCardProps) {
 
     const Icon = icons[type];
 
+    if (type === "balance") {
+        return (
+            <div
+                className={cn(
+                    "relative overflow-hidden p-5 rounded-3xl col-span-2",
+                    "bg-gradient-to-br from-primary via-primary/90 to-primary/70",
+                    "shadow-xl shadow-primary/30",
+                    "border border-white/20",
+                    className
+                )}
+            >
+                {/* Decoración Liquid Glass */}
+                <div className="absolute -right-10 -top-10 w-40 h-40 rounded-full bg-white/15 blur-2xl" />
+                <div className="absolute right-10 bottom-0 w-24 h-24 rounded-full bg-white/10 blur-xl" />
+
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-3">
+                        <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30">
+                            <Icon className="w-5 h-5 text-white" />
+                        </div>
+                        <span className="text-sm font-medium text-white/80">
+                            {title}
+                        </span>
+                    </div>
+
+                    <p className="text-4xl font-bold text-white tracking-tight">
+                        {formatCurrency(Math.abs(value))}
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <Card
+        <div
             className={cn(
-                "relative overflow-hidden p-4 border-0 card-hover",
-                type === "balance" && "gradient-primary text-white col-span-2",
-                type === "income" && "bg-card",
-                type === "expense" && "bg-card",
+                "relative overflow-hidden p-4 rounded-2xl",
+                "backdrop-blur-xl bg-white/50 dark:bg-white/5",
+                "border border-white/60 dark:border-white/10",
+                "shadow-lg shadow-black/5 dark:shadow-black/20",
                 className
             )}
+            style={{
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            }}
         >
-            {/* Decoración de fondo */}
-            {type === "balance" && (
-                <div className="absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10" />
-            )}
+            {/* Brillo interior */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent dark:from-white/5 pointer-events-none rounded-2xl" />
 
             <div className="relative z-10">
                 <div className="flex items-center gap-2 mb-2">
                     <div
                         className={cn(
-                            "w-8 h-8 rounded-lg flex items-center justify-center",
-                            type === "balance" && "bg-white/20",
+                            "w-9 h-9 rounded-xl flex items-center justify-center backdrop-blur-sm",
+                            "border border-white/40 dark:border-white/10",
                             type === "income" && "bg-chart-1/20",
                             type === "expense" && "bg-destructive/20"
                         )}
@@ -57,26 +91,19 @@ export function StatCard({ title, value, type, className }: StatCardProps) {
                         <Icon
                             className={cn(
                                 "w-4 h-4",
-                                type === "balance" && "text-white",
                                 type === "income" && "text-chart-1",
                                 type === "expense" && "text-destructive"
                             )}
                         />
                     </div>
-                    <span
-                        className={cn(
-                            "text-sm font-medium",
-                            type === "balance" ? "text-white/80" : "text-muted-foreground"
-                        )}
-                    >
+                    <span className="text-sm font-medium text-muted-foreground">
                         {title}
                     </span>
                 </div>
 
                 <p
                     className={cn(
-                        "font-bold",
-                        type === "balance" ? "text-3xl" : "text-2xl",
+                        "text-2xl font-bold tracking-tight",
                         type === "income" && "text-chart-1",
                         type === "expense" && "text-destructive"
                     )}
@@ -85,6 +112,7 @@ export function StatCard({ title, value, type, className }: StatCardProps) {
                     {formatCurrency(Math.abs(value))}
                 </p>
             </div>
-        </Card>
+        </div>
     );
 }
+

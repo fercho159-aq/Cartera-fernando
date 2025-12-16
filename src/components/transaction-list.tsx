@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Transaction } from "@/lib/db/schema";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -56,12 +55,18 @@ export function TransactionItem({ transaction, onDelete, isDeleting }: Transacti
     const categoryLabel = categoryLabels[transaction.category] || transaction.category;
 
     return (
-        <Card className="flex items-center gap-3 p-4 border-0 bg-card card-hover">
+        <div
+            className="flex items-center gap-3 p-4 rounded-2xl card-hover backdrop-blur-xl bg-white/50 dark:bg-white/5 border border-white/60 dark:border-white/10 shadow-sm"
+            style={{
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            }}
+        >
             {/* Icono de Categoría */}
             <div
                 className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0",
-                    isIncome ? "bg-chart-1/20" : "bg-muted"
+                    "w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 backdrop-blur-sm",
+                    isIncome ? "bg-chart-1/15 border border-chart-1/20" : "bg-white/40 dark:bg-white/10 border border-white/30 dark:border-white/10"
                 )}
             >
                 {emoji}
@@ -120,7 +125,7 @@ export function TransactionItem({ transaction, onDelete, isDeleting }: Transacti
                     )}
                 </Button>
             )}
-        </Card>
+        </div>
     );
 }
 

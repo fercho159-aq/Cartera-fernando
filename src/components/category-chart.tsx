@@ -1,7 +1,6 @@
 "use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const categoryColors: Record<string, string> = {
     food: "#f97316",
@@ -80,26 +79,32 @@ export function CategoryChart({ data }: CategoryChartProps) {
 
     if (chartData.length === 0) {
         return (
-            <Card className="border-0 bg-card">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Gastos por Categoría</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center h-48">
-                    <p className="text-muted-foreground text-center">
-                        Sin gastos este mes.<br />
-                        ¡Empieza a registrar tus gastos!
-                    </p>
-                </CardContent>
-            </Card>
+            <div
+                className="relative overflow-hidden p-5 rounded-2xl backdrop-blur-xl bg-white/50 dark:bg-white/5 border border-white/60 dark:border-white/10 shadow-lg shadow-black/5"
+                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent dark:from-white/5 pointer-events-none rounded-2xl" />
+                <div className="relative z-10">
+                    <h3 className="text-lg font-semibold mb-4">Gastos por Categoría</h3>
+                    <div className="flex items-center justify-center h-40">
+                        <p className="text-muted-foreground text-center">
+                            Sin gastos este mes.<br />
+                            ¡Empieza a registrar tus gastos!
+                        </p>
+                    </div>
+                </div>
+            </div>
         );
     }
 
     return (
-        <Card className="border-0 bg-card">
-            <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Gastos por Categoría</CardTitle>
-            </CardHeader>
-            <CardContent>
+        <div
+            className="relative overflow-hidden p-5 rounded-2xl backdrop-blur-xl bg-white/50 dark:bg-white/5 border border-white/60 dark:border-white/10 shadow-lg shadow-black/5"
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+        >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent dark:from-white/5 pointer-events-none rounded-2xl" />
+            <div className="relative z-10">
+                <h3 className="text-lg font-semibold mb-4">Gastos por Categoría</h3>
                 <div className="flex items-center gap-4">
                     <div className="w-40 h-40">
                         <ResponsiveContainer width="100%" height="100%">
@@ -147,7 +152,7 @@ export function CategoryChart({ data }: CategoryChartProps) {
                         )}
                     </div>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

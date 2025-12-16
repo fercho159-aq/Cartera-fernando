@@ -9,7 +9,6 @@ import {
     ResponsiveContainer,
     Legend,
 } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface MonthlyData {
     month: string;
@@ -70,26 +69,32 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
 
     if (chartData.length === 0) {
         return (
-            <Card className="border-0 bg-card">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Ingresos vs Gastos</CardTitle>
-                </CardHeader>
-                <CardContent className="flex items-center justify-center h-48">
-                    <p className="text-muted-foreground text-center">
-                        Sin datos aún.<br />
-                        ¡Agrega tu primera transacción!
-                    </p>
-                </CardContent>
-            </Card>
+            <div
+                className="relative overflow-hidden p-5 rounded-2xl backdrop-blur-xl bg-white/50 dark:bg-white/5 border border-white/60 dark:border-white/10 shadow-lg shadow-black/5"
+                style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+            >
+                <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent dark:from-white/5 pointer-events-none rounded-2xl" />
+                <div className="relative z-10">
+                    <h3 className="text-lg font-semibold mb-4">Ingresos vs Gastos</h3>
+                    <div className="flex items-center justify-center h-40">
+                        <p className="text-muted-foreground text-center">
+                            Sin datos aún.<br />
+                            ¡Agrega tu primera transacción!
+                        </p>
+                    </div>
+                </div>
+            </div>
         );
     }
 
     return (
-        <Card className="border-0 bg-card">
-            <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Ingresos vs Gastos</CardTitle>
-            </CardHeader>
-            <CardContent>
+        <div
+            className="relative overflow-hidden p-5 rounded-2xl backdrop-blur-xl bg-white/50 dark:bg-white/5 border border-white/60 dark:border-white/10 shadow-lg shadow-black/5"
+            style={{ backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)' }}
+        >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent dark:from-white/5 pointer-events-none rounded-2xl" />
+            <div className="relative z-10">
+                <h3 className="text-lg font-semibold mb-4">Ingresos vs Gastos</h3>
                 <div className="h-64 -ml-4">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={chartData} barGap={4}>
@@ -139,7 +144,7 @@ export function MonthlyChart({ data }: MonthlyChartProps) {
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
-            </CardContent>
-        </Card>
+            </div>
+        </div>
     );
 }

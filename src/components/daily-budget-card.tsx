@@ -1,6 +1,5 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
 import { Wallet, Calendar, TrendingUp, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,15 +38,29 @@ export function DailyBudgetCard({ balance, income, expenses }: DailyBudgetCardPr
     };
 
     return (
-        <Card className={cn(
-            "relative overflow-hidden p-4 border-0",
-            isCritical ? "bg-destructive/10 border border-destructive/30" :
-                isWarning ? "bg-yellow-500/10 border border-yellow-500/30" :
-                    "bg-gradient-to-r from-chart-1/20 to-chart-1/5"
-        )}>
-            {/* Icono de fondo */}
-            <div className="absolute -right-4 -bottom-4 opacity-10">
-                <Wallet className="w-24 h-24" />
+        <div
+            className={cn(
+                "relative overflow-hidden p-5 rounded-2xl",
+                "backdrop-blur-xl",
+                "border",
+                "shadow-lg",
+                isCritical
+                    ? "bg-destructive/10 border-destructive/30 shadow-destructive/10"
+                    : isWarning
+                        ? "bg-yellow-500/10 border-yellow-500/30 shadow-yellow-500/10"
+                        : "bg-white/50 dark:bg-white/5 border-white/60 dark:border-white/10 shadow-black/5"
+            )}
+            style={{
+                backdropFilter: 'blur(20px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+            }}
+        >
+            {/* Brillo interior */}
+            <div className="absolute inset-0 bg-gradient-to-br from-white/30 to-transparent dark:from-white/5 pointer-events-none rounded-2xl" />
+
+            {/* Icono de fondo con efecto blur */}
+            <div className="absolute -right-4 -bottom-4 opacity-5">
+                <Wallet className="w-28 h-28" />
             </div>
 
             <div className="relative z-10">
@@ -116,6 +129,6 @@ export function DailyBudgetCard({ balance, income, expenses }: DailyBudgetCardPr
                     )}
                 </div>
             </div>
-        </Card>
+        </div>
     );
 }

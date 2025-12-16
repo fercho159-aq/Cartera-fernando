@@ -27,7 +27,7 @@ export function BottomNav() {
     return (
         <>
             <nav
-                className="fixed z-50 nav-liquid safe-area-inset-bottom"
+                className="fixed z-50 safe-area-inset-bottom bottom-nav-liquid"
                 style={{
                     bottom: 0,
                     left: 0,
@@ -35,6 +35,11 @@ export function BottomNav() {
                     position: 'fixed',
                 }}
             >
+                {/* Brillo interior superior */}
+                <div
+                    className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/60 to-transparent dark:via-white/20"
+                />
+
                 <div className="flex items-center justify-around h-20 max-w-lg mx-auto px-4">
                     {navItems.map((item) => {
                         if (item.isButton) {
@@ -45,9 +50,9 @@ export function BottomNav() {
                                     className="relative -mt-10"
                                 >
                                     {/* Efecto de pulso suave */}
-                                    <div className="absolute inset-0 rounded-full bg-primary/20 pulse-ring" />
-                                    {/* FAB con Liquid Glass */}
-                                    <div className="relative flex items-center justify-center w-16 h-16 rounded-full fab-liquid active:scale-90 transition-transform">
+                                    <div className="absolute inset-0 rounded-full bg-primary/25 pulse-ring" />
+                                    {/* FAB con Liquid Glass premium */}
+                                    <div className="relative flex items-center justify-center w-16 h-16 rounded-full active:scale-90 transition-all duration-200 fab-premium">
                                         <Plus className="w-7 h-7 text-white" strokeWidth={2.5} />
                                     </div>
                                 </button>
@@ -62,7 +67,7 @@ export function BottomNav() {
                                 className={cn(
                                     "flex flex-col items-center justify-center px-4 py-2 rounded-2xl transition-all duration-300",
                                     isActive
-                                        ? "glass-pill text-primary"
+                                        ? "text-primary nav-item-pill-active"
                                         : "text-muted-foreground hover:text-foreground"
                                 )}
                             >
