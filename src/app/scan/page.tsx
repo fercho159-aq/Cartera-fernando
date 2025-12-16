@@ -46,87 +46,106 @@ const compressImage = (base64: string, maxWidth = 1024, quality = 0.8): Promise<
 // Función para extraer datos del texto OCR
 const extractTicketData = (text: string): TicketData => {
   const originalLines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  const lines = [...originalLines]; // Copia para no mutar
   
-  console.log('Texto OCR detectado:', text);
+  console.log('=== TEXTO OCR DETECTADO ===');
+  console.log(text);
+  console.log('=== FIN TEXTO ===');
   
-  // Buscar el total - buscar específicamente líneas con "Total"
+  // ============ BUSCAR MONTO TOTAL ============
   let amount = 0;
   
-  // Primero buscar líneas que contengan "Total" explícitamente
-  for (const line of lines) {
-    const totalMatch = line.match(/total[:\s]*\$?\s*([\d,\.]+)/i);
-    if (totalMatch) {
-      const numStr = totalMatch[1].replace(/,/g, '').replace(/\.(?=.*\.)/g, '');
-      const num = parseFloat(numStr);
-      if (num > 10 && num < 100000) {
-        amount = num;
-        console.log('Monto encontrado en Total:', num, 'de línea:', line);
-      }
-    }
-  }
-  
-  // Si no encontramos con "Total", buscar el número más grande que parezca precio
-  if (amount === 0) {
-    const pricePattern = /\$?\s*([\d,]+\.?\d{0,2})\s*(?:mxn|pesos|mn)?/gi;
-    let maxPrice = 0;
+  // Buscar la ÚLTIMA línea que contenga "Total" (ignorando "Subtotal")
+  const reversedLines = [...originalLines].reverse();
+  for (const line of reversedLines) {
+    // Ignorar líneas con "Subtotal" 
+    if (/subtotal/i.test(line)) continue;
     
-    for (const line of lines) {
-      let match;
-      while ((match = pricePattern.exec(line)) !== null) {
+    // Buscar "Total" seguido de un monto
+    // Patrones: "Total: $400.20 MXN" o "Total 1432.60 MXN" o "Total: -------- $400.20"
+    const totalPatterns = [
+      /total[:\s]*[\-]*\s*\$?\s*([\d,]+\.?\d*)\s*(?:mxn|pesos)?/i,
+      /total.*\$\s*([\d,]+\.?\d*)/i,
+      /\$\s*([\d,]+\.?\d*)\s*mxn/i,
+    ];
+    
+    for (const pattern of totalPatterns) {
+      const match = line.match(pattern);
+      if (match) {
         const numStr = match[1].replace(/,/g, '');
         const num = parseFloat(numStr);
-        if (num > maxPrice && num > 10 && num < 100000) {
+        if (num > 10 && num < 1000000) {
+          amount = num;
+          console.log('✅ Monto Total encontrado:', num, 'en línea:', line);
+          break;
+        }
+      }
+    }
+    if (amount > 0) break;
+  }
+  
+  // Si no encontramos "Total", buscar el número más grande con formato de precio
+  if (amount === 0) {
+    let maxPrice = 0;
+    for (const line of originalLines) {
+      // Buscar precios con formato $XXX.XX o XXX.XX MXN
+      const matches = line.matchAll(/\$?\s*([\d,]+\.\d{2})\s*(?:mxn)?/gi);
+      for (const match of matches) {
+        const num = parseFloat(match[1].replace(/,/g, ''));
+        if (num > maxPrice && num > 10) {
           maxPrice = num;
         }
       }
     }
-    amount = maxPrice;
-    console.log('Monto más grande encontrado:', amount);
+    if (maxPrice > 0) {
+      amount = maxPrice;
+      console.log('📊 Monto máximo encontrado:', amount);
+    }
   }
 
-  // Buscar fecha - mejorado para más formatos
+  // ============ BUSCAR FECHA ============
   let date = new Date().toISOString().split('T')[0];
-  const datePatterns = [
-    /fecha[:\s]*([\d]{1,2})[\.\/\-]([\d]{1,2})[\.\/\-]([\d]{2,4})/i,
-    /date[:\s]*([\d]{1,2})[\.\/\-]([\d]{1,2})[\.\/\-]([\d]{2,4})/i,
-    /([\d]{1,2})[\.\/\-]([\d]{1,2})[\.\/\-]([\d]{4})/,
-    /([\d]{1,2})[\.\/\-]([\d]{1,2})[\.\/\-]([\d]{2})\b/,
-  ];
-
+  let dateFound = false;
+  
   for (const line of originalLines) {
-    for (const pattern of datePatterns) {
-      const match = line.match(pattern);
+    // Patrón 1: "Date: 21.12.2023" o "Fecha: 15.12.2025"
+    let match = line.match(/(?:date|fecha)[:\s]*(\d{1,2})[\.\/-](\d{1,2})[\.\/-](\d{4})/i);
+    if (match) {
+      const day = match[1].padStart(2, '0');
+      const month = match[2].padStart(2, '0');
+      const year = match[3];
+      date = `${year}-${month}-${day}`;
+      dateFound = true;
+      console.log('✅ Fecha encontrada (con label):', date);
+      break;
+    }
+    
+    // Patrón 2: Fecha sin label "21.12.2023" o "15/12/2025"
+    if (!dateFound) {
+      match = line.match(/\b(\d{1,2})[\.\/-](\d{1,2})[\.\/-](\d{4})\b/);
       if (match) {
-        try {
-          let day = match[1];
-          let month = match[2];
-          let year = match[3];
-          
-          // Si el primer grupo tiene más de 2 dígitos y parece "fecha:", ajustar
-          if (day.length > 2) continue;
-          
-          // Normalizar año
-          if (year.length === 2) {
-            year = parseInt(year) > 50 ? `19${year}` : `20${year}`;
-          }
-          
-          date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-          console.log('Fecha encontrada:', date, 'de línea:', line);
+        const day = match[1].padStart(2, '0');
+        const month = match[2].padStart(2, '0');
+        const year = match[3];
+        // Validar que sea una fecha válida
+        const testDate = new Date(`${year}-${month}-${day}`);
+        if (!isNaN(testDate.getTime())) {
+          date = `${year}-${month}-${day}`;
+          dateFound = true;
+          console.log('✅ Fecha encontrada (sin label):', date);
           break;
-        } catch {
-          continue;
         }
       }
     }
   }
 
-  // Determinar categoría por palabras clave - ampliado
+  // ============ DETECTAR CATEGORÍA ============
   const textLower = text.toLowerCase();
   let category = 'other';
   
-  // Comida - ampliado con más palabras
-  if (/sushi|restaurante|restaurant|comida|pizza|burger|tacos|taco|cafe|café|coffee|starbucks|oxxo|seven|tienda|pollo|carne|mariscos|antojitos|cocina|food|kitchen|burritos|tortas/i.test(textLower)) {
+  // Patrones de comida (muy amplio)
+  const foodPatterns = /sushi|oishii|restaurante|restaurant|tacos|taco|pastor|gringa|torta|pizza|burger|hambur|comida|cafe|café|coffee|starbucks|oxxo|seven|pollo|carne|mariscos|antojitos|cocina|food|kitchen|burrito|cerveza|beer|edamame|roll|nigiri|sashimi/i;
+  
+  if (foodPatterns.test(textLower)) {
     category = 'food';
   } else if (/uber|didi|taxi|gasolina|gas|pemex|estacionamiento|parking|metro|autobus|bus/i.test(textLower)) {
     category = 'transport';
@@ -140,24 +159,33 @@ const extractTicketData = (text: string): TicketData => {
     category = 'utilities';
   }
   
-  console.log('Categoría detectada:', category);
+  console.log('📦 Categoría detectada:', category);
 
-  // Extraer título - buscar nombre del negocio (primera línea con letras mayúsculas)
+  // ============ EXTRAER NOMBRE DEL COMERCIO ============
   let title = 'Compra';
   
-  // Primero buscar una línea que parezca nombre de negocio
-  for (const line of originalLines.slice(0, 5)) { // Solo primeras 5 líneas
-    const cleanLine = line.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').trim();
+  // Buscar en las primeras líneas una que parezca nombre de negocio
+  for (const line of originalLines.slice(0, 8)) {
+    // Limpiar la línea de caracteres especiales y guiones
+    const cleanLine = line
+      .replace(/^[-=_\s]+|[-=_\s]+$/g, '') // Quitar guiones al inicio/final
+      .replace(/[^\w\sáéíóúÁÉÍÓÚñÑ\-]/g, ' ') // Quitar caracteres especiales excepto guiones
+      .replace(/\s+/g, ' ') // Normalizar espacios
+      .trim();
     
-    // Debe tener al menos 3 caracteres, no ser solo números, no contener palabras reservadas
+    // Criterios para ser un nombre de negocio:
+    // - Al menos 3 caracteres
+    // - Contiene letras (no solo números)
+    // - No es una palabra reservada de tickets
+    // - No empieza con "fecha", "date", "orden", etc.
     if (
       cleanLine.length >= 3 && 
-      cleanLine.length <= 40 &&
-      /[a-zA-ZáéíóúÁÉÍÓÚñÑ]{3,}/i.test(cleanLine) &&
-      !/total|subtotal|fecha|hora|rfc|folio|ticket|recibo|iva|cambio|efectivo|tarjeta|cliente/i.test(cleanLine)
+      cleanLine.length <= 50 &&
+      /[a-zA-ZáéíóúÁÉÍÓÚñÑ]{2,}/i.test(cleanLine) &&
+      !/^(total|subtotal|fecha|date|hora|time|rfc|folio|ticket|recibo|iva|orden|order|qty|item|precio|cantidad)/i.test(cleanLine)
     ) {
-      title = cleanLine.substring(0, 35);
-      console.log('Título encontrado:', title);
+      title = cleanLine.substring(0, 40);
+      console.log('🏪 Nombre del comercio:', title);
       break;
     }
   }
