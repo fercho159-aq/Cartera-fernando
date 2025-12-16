@@ -141,44 +141,75 @@
   --liquid-gradient: linear-gradient(135deg, oklch(1 0 0 / 12%) 0%, oklch(1 0 0 / 5%) 100%);
 }
 
-/* Tema Girly - Rosa y Lavanda con Liquid Glass */
+/* Tema Girly - Rosa Intenso y Vibrante 💖 */
 .girly {
-  --background: oklch(0.97 0.015 340);
-  --foreground: oklch(0.20 0.03 340);
-  --card: oklch(1 0 0 / 70%);
-  --card-foreground: oklch(0.20 0.03 340);
-  --popover: oklch(1 0 0 / 85%);
-  --popover-foreground: oklch(0.20 0.03 340);
-  --primary: oklch(0.65 0.2 350);
-  --primary-foreground: oklch(0.99 0.01 340);
-  --secondary: oklch(0.95 0.03 300 / 70%);
-  --secondary-foreground: oklch(0.25 0.03 300);
-  --muted: oklch(0.95 0.025 340 / 60%);
-  --muted-foreground: oklch(0.45 0.04 340);
-  --accent: oklch(0.92 0.04 320 / 50%);
-  --accent-foreground: oklch(0.20 0.03 320);
-  --destructive: oklch(0.60 0.22 25);
-  --border: oklch(0 0 0 / 8%);
-  --input: oklch(0.95 0.02 340 / 80%);
-  --ring: oklch(0.65 0.2 350);
-  --chart-1: oklch(0.70 0.18 142);
-  --chart-2: oklch(0.65 0.2 350);
-  --chart-3: oklch(0.70 0.15 300);
-  --chart-4: oklch(0.65 0.12 30);
-  --chart-5: oklch(0.60 0.15 200);
-  --sidebar: oklch(0.97 0.015 340 / 90%);
-  --sidebar-foreground: oklch(0.20 0.03 340);
-  --sidebar-primary: oklch(0.65 0.2 350);
-  --sidebar-primary-foreground: oklch(0.99 0.01 340);
-  --sidebar-accent: oklch(0.92 0.03 320 / 60%);
-  --sidebar-accent-foreground: oklch(0.20 0.03 320);
-  --sidebar-border: oklch(0 0 0 / 6%);
-  --sidebar-ring: oklch(0.65 0.2 350);
-  --income: oklch(0.70 0.18 142);
-  --expense: oklch(0.65 0.2 350);
+  /* Base - Rosa suave de fondo */
+  --background: oklch(0.96 0.03 350);
+  --foreground: oklch(0.25 0.05 340);
 
-  --glass-border: oklch(1 0 0 / 50%);
-  --liquid-gradient: linear-gradient(135deg, oklch(0.98 0.02 340 / 60%) 0%, oklch(0.95 0.03 320 / 30%) 100%);
+  /* Cards con rosa muy suave */
+  --card: oklch(1 0 0 / 75%);
+  --card-foreground: oklch(0.25 0.05 340);
+
+  /* Popover */
+  --popover: oklch(1 0 0 / 90%);
+  --popover-foreground: oklch(0.25 0.05 340);
+
+  /* Primary - Rosa intenso y vibrante (Hot Pink) */
+  --primary: oklch(0.60 0.28 350);
+  --primary-foreground: oklch(0.99 0.01 350);
+
+  /* Secondary - Rosa lavanda */
+  --secondary: oklch(0.90 0.08 320 / 80%);
+  --secondary-foreground: oklch(0.35 0.08 320);
+
+  /* Muted - Rosa pastel */
+  --muted: oklch(0.92 0.05 350 / 70%);
+  --muted-foreground: oklch(0.50 0.08 350);
+
+  /* Accent - Magenta suave */
+  --accent: oklch(0.88 0.10 330 / 60%);
+  --accent-foreground: oklch(0.30 0.08 330);
+
+  /* Destructive - Rojo rosado */
+  --destructive: oklch(0.55 0.25 15);
+
+  /* Borders e inputs */
+  --border: oklch(0.60 0.20 350 / 20%);
+  --input: oklch(0.94 0.04 350 / 85%);
+  --ring: oklch(0.60 0.28 350);
+
+  /* Charts con colores vibrantes */
+  --chart-1: oklch(0.65 0.20 145);
+  /* Verde menta vibrante */
+  --chart-2: oklch(0.60 0.28 350);
+  /* Hot pink */
+  --chart-3: oklch(0.65 0.22 290);
+  /* Púrpura violeta */
+  --chart-4: oklch(0.70 0.18 50);
+  /* Coral/Durazno */
+  --chart-5: oklch(0.60 0.20 200);
+  /* Turquesa */
+
+  /* Sidebar */
+  --sidebar: oklch(0.95 0.04 350 / 92%);
+  --sidebar-foreground: oklch(0.25 0.05 340);
+  --sidebar-primary: oklch(0.60 0.28 350);
+  --sidebar-primary-foreground: oklch(0.99 0.01 350);
+  --sidebar-accent: oklch(0.88 0.08 330 / 70%);
+  --sidebar-accent-foreground: oklch(0.30 0.08 330);
+  --sidebar-border: oklch(0.60 0.20 350 / 15%);
+  --sidebar-ring: oklch(0.60 0.28 350);
+
+  /* Financial */
+  --income: oklch(0.65 0.20 145);
+  --expense: oklch(0.60 0.28 350);
+
+  /* Liquid Glass - Rosa brillante */
+  --glass-border: oklch(0.80 0.15 350 / 50%);
+  --glass-shadow: 0 8px 32px oklch(0.60 0.25 350 / 15%);
+  --glass-shadow-elevated: 0 25px 60px oklch(0.60 0.25 350 / 25%);
+  --liquid-gradient: linear-gradient(135deg, oklch(0.95 0.06 350 / 70%) 0%, oklch(0.90 0.10 320 / 40%) 100%);
 }
 
 @layer base {
@@ -234,6 +265,73 @@ html {
 
 .safe-area-content {
   padding-top: max(env(safe-area-inset-top, 0px), 1rem);
+}
+
+/* ==================== GIRLY THEME SPECIAL EFFECTS ==================== */
+
+/* Girly theme gradient backgrounds */
+.girly .gradient-primary {
+  background: linear-gradient(145deg, oklch(0.62 0.28 350) 0%, oklch(0.55 0.25 340) 50%, oklch(0.50 0.22 320) 100%);
+  box-shadow: 0 8px 32px oklch(0.60 0.28 350 / 40%);
+}
+
+.girly .gradient-hero {
+  background: linear-gradient(135deg, oklch(0.70 0.20 350) 0%, oklch(0.60 0.25 330) 50%, oklch(0.55 0.20 290) 100%);
+}
+
+/* Girly FAB with glowing effect */
+.girly .fab-premium {
+  background: linear-gradient(145deg, oklch(0.65 0.28 350) 0%, oklch(0.55 0.25 340) 100%) !important;
+  box-shadow:
+    0 8px 30px oklch(0.60 0.28 350 / 50%),
+    0 4px 12px oklch(0.60 0.28 350 / 30%),
+    inset 0 1px 0 oklch(1 0 0 / 40%) !important;
+  border-color: oklch(1 0 0 / 40%) !important;
+}
+
+/* Girly Bottom Nav */
+.girly .bottom-nav-liquid {
+  background: oklch(0.98 0.02 350 / 92%);
+  border-top: 1.5px solid oklch(0.60 0.20 350 / 25%);
+  box-shadow:
+    0 -10px 40px oklch(0.60 0.25 350 / 10%),
+    inset 0 1px 0 oklch(1 0 0 / 60%);
+}
+
+/* Girly nav item active */
+.girly .nav-item-pill-active {
+  background: oklch(0.60 0.28 350 / 15%);
+  box-shadow: inset 0 0 0 1px oklch(0.60 0.28 350 / 25%);
+}
+
+/* Girly cards with subtle pink glow */
+.girly .card-glass {
+  border: 1px solid oklch(0.60 0.20 350 / 20%);
+  box-shadow:
+    0 4px 24px oklch(0.60 0.25 350 / 8%),
+    inset 0 1px 0 oklch(1 0 0 / 50%);
+}
+
+/* Girly buttons */
+.girly .btn-liquid {
+  background: oklch(0.60 0.28 350 / 12%);
+  border: 1px solid oklch(0.60 0.28 350 / 20%);
+}
+
+.girly .btn-liquid:hover {
+  background: oklch(0.60 0.28 350 / 18%);
+}
+
+/* Girly chart colors - more vibrant pinks and purples */
+.girly .recharts-pie-sector {
+  stroke: oklch(0.98 0.02 350);
+}
+
+/* Girly inputs with pink focus */
+.girly input:focus,
+.girly textarea:focus {
+  border-color: oklch(0.60 0.28 350) !important;
+  box-shadow: 0 0 0 3px oklch(0.60 0.28 350 / 15%) !important;
 }
 
 /* ==================== LIQUID GLASS EFFECTS ==================== */
@@ -406,17 +504,17 @@ html {
 
 /* Bottom Nav with pronounced Liquid Glass */
 .bottom-nav-liquid {
-  backdrop-filter: blur(50px) saturate(200%);
-  -webkit-backdrop-filter: blur(50px) saturate(200%);
-  background: rgba(255, 255, 255, 0.6);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(60px) saturate(200%);
+  -webkit-backdrop-filter: blur(60px) saturate(200%);
+  background: rgba(255, 255, 255, 0.92);
+  border-top: 1.5px solid rgba(255, 255, 255, 0.8);
   box-shadow:
     0 -10px 40px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 .dark .bottom-nav-liquid {
-  background: rgba(20, 20, 35, 0.75);
+  background: rgba(20, 20, 35, 0.92);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
     0 -10px 40px rgba(0, 0, 0, 0.35),
