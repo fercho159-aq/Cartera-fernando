@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTransactionStore } from "@/lib/store";
+import { VoiceInput } from "./voice-input";
+
 
 const categories = [
     { value: "food", label: "🍔 Comida", emoji: "🍔" },
@@ -89,6 +91,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
     const [recurrence, setRecurrence] = useState("none");
     const [isLoading, setIsLoading] = useState(false);
+    const [voiceError, setVoiceError] = useState<string | null>(null);
 
     const handleScanDataLoaded = (data: { amount: string; title: string; category: string; date: string }) => {
         setAmount(data.amount);
@@ -97,6 +100,18 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
         setDate(data.date);
         setType("expense");
         onOpenChange(true);
+    };
+
+    const handleVoiceResult = (result: { amount: number; title: string; category: string; type: "income" | "expense" }) => {
+        setAmount(result.amount.toString());
+        setTitle(result.title);
+        setCategory(result.category);
+        setType(result.type);
+        setVoiceError(null);
+    };
+
+    const handleVoiceError = (error: string) => {
+        setVoiceError(error);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -158,16 +173,27 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                     </SheetHeader>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Botón de Escanear Ticket */}
-                        <Button
-                            type="button"
-                            variant="outline"
-                            onClick={goToScan}
-                            className="w-full h-14 text-lg rounded-xl border-dashed border-2 hover:border-primary hover:bg-primary/5"
-                        >
-                            <Camera className="w-6 h-6 mr-3" />
-                            📸 Escanear Ticket
-                        </Button>
+                        {/* Opciones rápidas: Escanear y Voz */}
+                        <div className="space-y-3">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={goToScan}
+                                className="w-full h-14 text-lg rounded-xl border-dashed border-2 hover:border-primary hover:bg-primary/5"
+                            >
+                                <Camera className="w-6 h-6 mr-3" />
+                                📸 Escanear Ticket
+                            </Button>
+
+                            <VoiceInput 
+                                onResult={handleVoiceResult} 
+                                onError={handleVoiceError}
+                            />
+
+                            {voiceError && (
+                                <p className="text-sm text-red-500 text-center">{voiceError}</p>
+                            )}
+                        </div>
 
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
@@ -179,6 +205,7 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
                                 </span>
                             </div>
                         </div>
+
 
                         {/* Selector de Tipo */}
                         <div className="flex gap-2 p-1 bg-muted rounded-xl">
