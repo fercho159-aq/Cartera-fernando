@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Camera, X, Loader2, Check, RotateCcw, ImageIcon, ArrowLeft } from "lucide-react";
+import { Camera, Loader2, Check, RotateCcw, ImageIcon, ArrowLeft } from "lucide-react";
+import Tesseract from 'tesseract.js';
 
 interface TicketData {
   amount: number;
@@ -13,7 +14,7 @@ interface TicketData {
 }
 
 // Función para comprimir imagen
-const compressImage = (base64: string, maxWidth = 1024, quality = 0.7): Promise<string> => {
+const compressImage = (base64: string, maxWidth = 1024, quality = 0.8): Promise<string> => {
   return new Promise((resolve) => {
     const img = new Image();
     img.onload = () => {
@@ -21,7 +22,6 @@ const compressImage = (base64: string, maxWidth = 1024, quality = 0.7): Promise<
       let width = img.width;
       let height = img.height;
 
-      // Escalar si es muy grande
       if (width > maxWidth) {
         height = (height * maxWidth) / width;
         width = maxWidth;
@@ -43,10 +43,105 @@ const compressImage = (base64: string, maxWidth = 1024, quality = 0.7): Promise<
   });
 };
 
+// Función para extraer datos del texto OCR
+const extractTicketData = (text: string): TicketData => {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  
+  // Buscar el total
+  let amount = 0;
+  const totalPatterns = [
+    /total[:\s]*\$?\s*([\d,]+\.?\d*)/i,
+    /importe[:\s]*\$?\s*([\d,]+\.?\d*)/i,
+    /monto[:\s]*\$?\s*([\d,]+\.?\d*)/i,
+    /\$\s*([\d,]+\.?\d*)/,
+    /([\d,]+\.\d{2})\s*(?:mxn|pesos)?/i,
+  ];
+
+  for (const pattern of totalPatterns) {
+    for (const line of lines.reverse()) {
+      const match = line.match(pattern);
+      if (match) {
+        const numStr = match[1].replace(/,/g, '');
+        const num = parseFloat(numStr);
+        if (num > amount && num < 100000) {
+          amount = num;
+        }
+      }
+    }
+  }
+
+  // Buscar fecha
+  let date = new Date().toISOString().split('T')[0];
+  const datePatterns = [
+    /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/,
+    /(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/,
+  ];
+
+  for (const line of lines) {
+    for (const pattern of datePatterns) {
+      const match = line.match(pattern);
+      if (match) {
+        try {
+          if (match[1].length === 4) {
+            // YYYY-MM-DD
+            date = `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`;
+          } else if (match[3].length === 4) {
+            // DD-MM-YYYY
+            date = `${match[3]}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
+          } else {
+            // DD-MM-YY
+            const year = parseInt(match[3]) > 50 ? `19${match[3]}` : `20${match[3]}`;
+            date = `${year}-${match[2].padStart(2, '0')}-${match[1].padStart(2, '0')}`;
+          }
+          break;
+        } catch {
+          continue;
+        }
+      }
+    }
+  }
+
+  // Determinar categoría por palabras clave
+  const textLower = text.toLowerCase();
+  let category = 'other';
+  
+  if (/restaurante|comida|pizza|burger|tacos|cafe|coffee|starbucks|oxxo|seven|tienda/i.test(textLower)) {
+    category = 'food';
+  } else if (/uber|didi|taxi|gasolina|gas|pemex/i.test(textLower)) {
+    category = 'transport';
+  } else if (/cine|netflix|spotify|juego|game/i.test(textLower)) {
+    category = 'entertainment';
+  } else if (/farmacia|hospital|doctor|medic|salud/i.test(textLower)) {
+    category = 'health';
+  } else if (/walmart|soriana|chedraui|liverpool|palacio|amazon|mercado libre/i.test(textLower)) {
+    category = 'shopping';
+  } else if (/luz|agua|telmex|internet|telefono|cfe/i.test(textLower)) {
+    category = 'utilities';
+  }
+
+  // Extraer título (primera línea significativa o nombre del negocio)
+  let title = 'Compra';
+  for (const line of lines) {
+    if (line.length > 3 && line.length < 50 && !/^\d+$/.test(line) && !/total|fecha|hora|rfc/i.test(line)) {
+      title = line.substring(0, 40);
+      break;
+    }
+  }
+
+  return {
+    amount: amount || 0,
+    title,
+    category,
+    date,
+    confidence: amount > 0 ? 0.7 : 0.3,
+  };
+};
+
 export default function ScanPage() {
   const router = useRouter();
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<TicketData | null>(null);
 
@@ -57,8 +152,7 @@ export default function ScanPage() {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const result = e.target?.result as string;
-        // Comprimir la imagen antes de guardarla
-        const compressed = await compressImage(result, 1024, 0.7);
+        const compressed = await compressImage(result, 1024, 0.8);
         setCapturedImage(compressed);
       };
       reader.onerror = () => {
@@ -73,29 +167,31 @@ export default function ScanPage() {
 
     setIsProcessing(true);
     setError(null);
+    setProgress(0);
 
     try {
-      const response = await fetch("/api/scan-ticket", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: capturedImage }),
-      });
+      const result = await Tesseract.recognize(
+        capturedImage,
+        'spa+eng', // Español e inglés
+        {
+          logger: (m) => {
+            if (m.status === 'recognizing text') {
+              setProgress(Math.round(m.progress * 100));
+            }
+          },
+        }
+      );
 
-      if (response.status === 413) {
-        throw new Error("La imagen es muy grande. Intenta con una foto más pequeña.");
+      const extractedData = extractTicketData(result.data.text);
+      
+      if (extractedData.amount === 0) {
+        setError("No se pudo detectar el monto. ¿Puedes verlo claramente en la imagen?");
       }
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Error al procesar el ticket");
-      }
-
-      setScanResult(result.data);
+      
+      setScanResult(extractedData);
     } catch (err) {
       console.error("Error processing ticket:", err);
-      const errorMsg = err instanceof Error ? err.message : "Error al procesar el ticket.";
-      setError(errorMsg);
+      setError("Error al procesar el ticket. Intenta con otra foto.");
     } finally {
       setIsProcessing(false);
     }
@@ -103,7 +199,6 @@ export default function ScanPage() {
 
   const confirmResult = useCallback(() => {
     if (scanResult) {
-      // Guardar en sessionStorage y redirigir
       sessionStorage.setItem('scannedTicket', JSON.stringify(scanResult));
       router.push('/?fromScan=true');
     }
@@ -113,6 +208,7 @@ export default function ScanPage() {
     setCapturedImage(null);
     setScanResult(null);
     setError(null);
+    setProgress(0);
   }, []);
 
   const goBack = () => {
@@ -170,6 +266,10 @@ export default function ScanPage() {
               <span className="font-medium">{scanResult.date}</span>
             </div>
           </div>
+
+          <p className="text-center text-sm text-muted-foreground mt-4">
+            Puedes editar los datos después de confirmar
+          </p>
         </div>
 
         <div className="p-4 border-t space-y-2 bg-background">
@@ -222,7 +322,7 @@ export default function ScanPage() {
             {isProcessing ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
-                Analizando con IA...
+                Analizando... {progress}%
               </>
             ) : (
               <>
@@ -261,8 +361,7 @@ export default function ScanPage() {
           <div>
             <h2 className="text-xl font-semibold mb-2">Escanea tu ticket</h2>
             <p className="text-muted-foreground text-sm">
-              Toma una foto del ticket o selecciona una imagen de tu galería. 
-              La IA extraerá automáticamente el monto, fecha y comercio.
+              Toma una foto clara del ticket. El OCR extraerá el monto, fecha y comercio automáticamente.
             </p>
           </div>
           {error && (
