@@ -21,7 +21,8 @@ import {
     LogOut,
     Loader2,
     Palette,
-    Users
+    Users,
+    Image
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/components/theme-provider";
@@ -34,6 +35,11 @@ export default function SettingsPage() {
     const [isInstallable, setIsInstallable] = useState(false);
     const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+    // Estado para íconos de la app
+    const [activeIcon, setActiveIcon] = useState<string>('default');
+    const [availableIcons, setAvailableIcons] = useState<{ id: string; name: string; preview: string }[]>([]);
+    const [isChangingIcon, setIsChangingIcon] = useState(false);
 
     useEffect(() => {
         // Verificar permisos de notificación
@@ -49,6 +55,21 @@ export default function SettingsPage() {
         };
 
         window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+        // Cargar íconos disponibles
+        const loadIcons = async () => {
+            try {
+                const response = await fetch('/api/app-icon');
+                if (response.ok) {
+                    const data = await response.json();
+                    setActiveIcon(data.activeIcon);
+                    setAvailableIcons(data.availableIcons);
+                }
+            } catch (error) {
+                console.error('Error loading icons:', error);
+            }
+        };
+        loadIcons();
 
         return () => {
             window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
@@ -85,6 +106,30 @@ export default function SettingsPage() {
     const handleLogout = async () => {
         setIsLoggingOut(true);
         await signOut({ callbackUrl: "/login" });
+    };
+
+    const handleChangeIcon = async (iconId: string) => {
+        if (iconId === activeIcon || isChangingIcon) return;
+
+        setIsChangingIcon(true);
+        try {
+            const response = await fetch('/api/app-icon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ iconSet: iconId })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setActiveIcon(data.activeIcon);
+                // Mostrar mensaje de éxito
+                alert('Ícono actualizado. Si tienes la app instalada, reinstala para ver los cambios.');
+            }
+        } catch (error) {
+            console.error('Error changing icon:', error);
+        } finally {
+            setIsChangingIcon(false);
+        }
     };
 
     const themeOptions = [
@@ -203,6 +248,60 @@ export default function SettingsPage() {
                         </p>
                     </CardContent>
                 </Card>
+
+                {/* Ícono de la App */}
+                {availableIcons.length > 0 && (
+                    <Card className="border-0 bg-card shadow-sm">
+                        <CardHeader className="pb-2">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                                <Image className="w-5 h-5" />
+                                Ícono de la App
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 gap-3">
+                                {availableIcons.map((icon) => {
+                                    const isActive = activeIcon === icon.id;
+                                    return (
+                                        <button
+                                            key={icon.id}
+                                            onClick={() => handleChangeIcon(icon.id)}
+                                            disabled={isChangingIcon}
+                                            className={cn(
+                                                "relative flex items-center gap-3 p-4 rounded-xl transition-all",
+                                                isActive
+                                                    ? "bg-primary/10 border-2 border-primary"
+                                                    : "bg-muted hover:bg-muted/80 border-2 border-transparent"
+                                            )}
+                                        >
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={icon.preview}
+                                                alt={icon.name}
+                                                className="w-14 h-14 rounded-xl"
+                                            />
+                                            <div className="flex-1 text-left">
+                                                <p className="font-medium">{icon.name}</p>
+                                                {isActive && (
+                                                    <p className="text-xs text-primary">Activo</p>
+                                                )}
+                                            </div>
+                                            {isActive && (
+                                                <Check className="w-5 h-5 text-primary" />
+                                            )}
+                                            {isChangingIcon && !isActive && (
+                                                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                                            )}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-3 text-center">
+                                Reinstala la app para aplicar el nuevo ícono
+                            </p>
+                        </CardContent>
+                    </Card>
+                )}
 
                 {/* Instalar App */}
                 {isInstallable && (
