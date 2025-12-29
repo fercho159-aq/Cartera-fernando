@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { incomeSources } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getServerSession } from '@/lib/auth-helpers';
 
 // GET - Obtener una fuente de ingreso específica
 export async function GET(
@@ -11,7 +10,7 @@ export async function GET(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
         }
@@ -45,7 +44,7 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
         }
@@ -96,7 +95,7 @@ export async function DELETE(
     { params }: { params: Promise<{ id: string }> }
 ) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
         }

@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { incomeSources, transactions } from '@/lib/db/schema';
 import { eq, and, isNull, gte, lte, sql } from 'drizzle-orm';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { getServerSession } from '@/lib/auth-helpers';
 
 interface ForecastDay {
     date: string;
@@ -27,7 +26,7 @@ interface ForecastMonth {
 // GET - Generar forecast de 3 meses
 export async function GET(request: NextRequest) {
     try {
-        const session = await getServerSession(authOptions);
+        const session = await getServerSession();
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
         }
