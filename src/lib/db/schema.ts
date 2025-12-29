@@ -76,6 +76,64 @@ export const debts = pgTable('debts', {
   createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
+// Enums para fuentes de ingreso
+export const paymentFrequencyEnum = pgEnum('payment_frequency', ['weekly', 'biweekly', 'monthly', 'custom']);
+export const incomeTypeEnum = pgEnum('income_type', ['fixed', 'variable']);
+export const commissionStatusEnum = pgEnum('commission_status', ['pending', 'confirmed', 'paid']);
+
+// Income Sources table - Fuentes de ingreso configuradas
+export const incomeSources = pgTable('income_sources', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  accountId: integer('account_id').references(() => accounts.id, { onDelete: 'cascade' }), // NULL = cuenta personal
+  
+  // Información básica
+  name: varchar('name', { length: 255 }).notNull(),
+  type: incomeTypeEnum('type').notNull().default('fixed'),
+  
+  // Configuración de pago
+  baseAmount: decimal('base_amount', { precision: 12, scale: 2 }).notNull(),
+  frequency: paymentFrequencyEnum('frequency').notNull().default('monthly'),
+  
+  // Días de pago (almacenados como string JSON: "[1, 15]")
+  payDays: text('pay_days').notNull().default('[15, 30]'),
+  
+  // Para ingresos variables (comisiones)
+  minExpected: decimal('min_expected', { precision: 12, scale: 2 }),
+  maxExpected: decimal('max_expected', { precision: 12, scale: 2 }),
+  averageLast3Months: decimal('average_last_3_months', { precision: 12, scale: 2 }),
+  
+  // Estado
+  isActive: boolean('is_active').notNull().default(true),
+  includeInForecast: boolean('include_in_forecast').notNull().default(true),
+  
+  // Metadata
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+// Commission Records table - Registro histórico de comisiones
+export const commissionRecords = pgTable('commission_records', {
+  id: serial('id').primaryKey(),
+  incomeSourceId: integer('income_source_id').references(() => incomeSources.id, { onDelete: 'cascade' }).notNull(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+  
+  // Datos de la comisión
+  amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
+  periodMonth: integer('period_month').notNull(), // 1-12
+  periodYear: integer('period_year').notNull(),
+  
+  // Estado
+  status: commissionStatusEnum('status').notNull().default('pending'),
+  confirmedAt: timestamp('confirmed_at'),
+  paidAt: timestamp('paid_at'),
+  
+  // Notas
+  notes: text('notes'),
+  
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -87,3 +145,7 @@ export type Account = typeof accounts.$inferSelect;
 export type NewAccount = typeof accounts.$inferInsert;
 export type AccountMember = typeof accountMembers.$inferSelect;
 export type NewAccountMember = typeof accountMembers.$inferInsert;
+export type IncomeSource = typeof incomeSources.$inferSelect;
+export type NewIncomeSource = typeof incomeSources.$inferInsert;
+export type CommissionRecord = typeof commissionRecords.$inferSelect;
+export type NewCommissionRecord = typeof commissionRecords.$inferInsert;

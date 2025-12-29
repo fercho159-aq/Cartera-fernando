@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { StatCard } from "./stat-card";
-import { DailyBudgetCard } from "./daily-budget-card";
+import { SmartBudgetCard } from "./smart-budget-card";
 import { CategoryChart } from "./category-chart";
 import { MonthlyChart } from "./monthly-chart";
 import { TransactionList } from "./transaction-list";
@@ -144,9 +144,9 @@ export function Dashboard() {
                 />
             </div>
 
-            {/* Tarjeta de Presupuesto Diario */}
+            {/* Tarjeta de Presupuesto Diario Inteligente */}
             <div className="mb-6">
-                <DailyBudgetCard
+                <SmartBudgetCard
                     balance={monthlyStats.balance}
                     income={monthlyStats.income}
                     expenses={monthlyStats.expenses}
