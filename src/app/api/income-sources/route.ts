@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
                 type,
                 baseAmount: baseAmount.toString(),
                 frequency,
-                payDays: JSON.stringify(payDays),
+                payDays, // Drizzle ORM will handle the array conversion to PostgreSQL format
                 minExpected: minExpected?.toString() || null,
                 maxExpected: maxExpected?.toString() || null,
                 includeInForecast

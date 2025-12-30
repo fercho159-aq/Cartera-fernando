@@ -60,7 +60,7 @@ export async function PUT(
         if (body.type !== undefined) updateData.type = body.type;
         if (body.baseAmount !== undefined) updateData.baseAmount = body.baseAmount.toString();
         if (body.frequency !== undefined) updateData.frequency = body.frequency;
-        if (body.payDays !== undefined) updateData.payDays = JSON.stringify(body.payDays);
+        if (body.payDays !== undefined) updateData.payDays = body.payDays; // Drizzle ORM will handle the array conversion
         if (body.minExpected !== undefined) updateData.minExpected = body.minExpected?.toString() || null;
         if (body.maxExpected !== undefined) updateData.maxExpected = body.maxExpected?.toString() || null;
         if (body.averageLast3Months !== undefined) updateData.averageLast3Months = body.averageLast3Months?.toString() || null;
