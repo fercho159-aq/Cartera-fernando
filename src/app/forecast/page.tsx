@@ -201,7 +201,7 @@ export default function ForecastPage() {
                                         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                                             <span>{frequencyLabels[source.frequency]}</span>
                                             <span>•</span>
-                                            <span>Días: {JSON.parse(source.payDays).join(", ")}</span>
+                                            <span>Días: {source.payDays.join(", ")}</span>
                                         </div>
                                         {source.type === "variable" && source.averageLast3Months && (
                                             <p className="text-xs text-muted-foreground mt-1">
