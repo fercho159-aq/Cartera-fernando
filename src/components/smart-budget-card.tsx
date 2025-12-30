@@ -32,7 +32,7 @@ export function SmartBudgetCard({ balance, income, expenses }: SmartBudgetCardPr
     const smartDailyBudget = hasIncomeSources
         ? forecast.smartDailyBudget
         : balance > 0 ? balance / daysRemainingInMonth : 0;
-    
+
     const daysUntilNextPay = hasIncomeSources
         ? forecast.daysUntilNextPay
         : daysRemainingInMonth;
@@ -150,7 +150,11 @@ export function SmartBudgetCard({ balance, income, expenses }: SmartBudgetCardPr
                             <div className="flex items-center justify-between mb-2">
                                 <span className="text-xs text-muted-foreground">Próximo pago</span>
                                 <span className="text-xs font-medium text-chart-1">
-                                    Día {forecast.nextPayday.day}
+                                    {(() => {
+                                        const date = new Date();
+                                        date.setDate(date.getDate() + forecast.nextPayday.daysUntil);
+                                        return date.toLocaleDateString("es-MX", { day: "numeric", month: "long" });
+                                    })()}
                                 </span>
                             </div>
                             <div className="flex items-center justify-between">
