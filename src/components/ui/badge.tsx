@@ -33,10 +33,10 @@ function Badge({ className, variant, asChild = false, ...props }: BadgeProps) {
   if (asChild && React.Children.count(props.children) === 1) {
     const child = React.Children.only(props.children) as React.ReactElement
     return React.cloneElement(child, {
-      ...child.props,
+      ...(child.props as object),
       ...props,
-      className: cn(badgeVariants({ variant }), className, child.props.className),
-    })
+      className: cn(badgeVariants({ variant }), className, (child.props as any)?.className),
+    } as any)
   }
 
   return <div className={cn(badgeVariants({ variant }), className)} {...props} />
