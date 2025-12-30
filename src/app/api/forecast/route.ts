@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
             .from(transactions)
             .where(expenseQuery);
 
-        const avgMonthlyExpense = expenseResult.count > 0 
+        const avgMonthlyExpense = expenseResult.count > 0
             ? Number(expenseResult.total) / Number(expenseResult.count)
             : 0;
 
@@ -142,7 +142,7 @@ export async function GET(request: NextRequest) {
             const paydays: ForecastDay[] = [];
 
             for (const source of sources) {
-                const payDays: number[] = JSON.parse(source.payDays || '[15, 30]');
+                const payDays: number[] = source.payDays || [15, 30];
                 const amount = source.type === 'variable' && source.averageLast3Months
                     ? Number(source.averageLast3Months)
                     : Number(source.baseAmount);
@@ -244,7 +244,7 @@ export async function GET(request: NextRequest) {
         let nextPayday = null;
 
         for (const source of sources) {
-            const payDays: number[] = JSON.parse(source.payDays || '[15, 30]');
+            const payDays: number[] = source.payDays || [15, 30];
             for (const day of payDays) {
                 if (day > currentDay) {
                     const amount = source.type === 'variable' && source.averageLast3Months
@@ -268,7 +268,7 @@ export async function GET(request: NextRequest) {
         if (!nextPayday && sources.length > 0) {
             const firstPayDays: number[] = [];
             for (const source of sources) {
-                const payDays: number[] = JSON.parse(source.payDays || '[15, 30]');
+                const payDays: number[] = source.payDays || [15, 30];
                 firstPayDays.push(...payDays);
             }
             const firstDay = Math.min(...firstPayDays);
@@ -278,7 +278,7 @@ export async function GET(request: NextRequest) {
                 daysUntil: (daysInMonth - currentDay) + firstDay,
                 sources: sources
                     .filter(s => {
-                        const payDays: number[] = JSON.parse(s.payDays || '[15, 30]');
+                        const payDays: number[] = s.payDays || [15, 30];
                         return payDays.includes(firstDay);
                     })
                     .map(s => ({
@@ -309,7 +309,7 @@ export async function GET(request: NextRequest) {
                     ? Number(s.averageLast3Months)
                     : Number(s.baseAmount),
                 frequency: s.frequency,
-                payDays: JSON.parse(s.payDays || '[15, 30]')
+                payDays: s.payDays || [15, 30]
             })),
             forecast
         });
