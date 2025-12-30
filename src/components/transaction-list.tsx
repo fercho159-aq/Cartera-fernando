@@ -183,13 +183,18 @@ export function TransactionList({ transactions, limit, showDeleteButton = true }
         const cat = categories.find(c => c.name === catName);
         if (cat) {
             let emoji = "📦";
-            // Check if icon is effectively an emoji (length check is heuristic but effective for single emojis)
-            // or if it matches our icon map
-            if (cat.icon && (/\p{Emoji}/u.test(cat.icon) || cat.icon.length <= 2)) {
+
+            // Priority: Mapped Icon -> Mapped Name -> Emoji check -> Fallback
+            if (cat.icon && iconToEmoji[cat.icon]) {
+                emoji = iconToEmoji[cat.icon];
+            } else if (iconToEmoji[cat.name]) {
+                emoji = iconToEmoji[cat.name];
+            } else if (cat.icon && cat.icon.length <= 4 && !/^[a-zA-Z0-9]+$/.test(cat.icon)) {
                 emoji = cat.icon;
             } else {
-                emoji = iconToEmoji[cat.icon] || iconToEmoji[cat.name] || defaultCategoryEmojis[catName] || "📦";
+                emoji = defaultCategoryEmojis[catName] || "📦";
             }
+
             return { label: cat.label, emoji };
         }
         // Fallback

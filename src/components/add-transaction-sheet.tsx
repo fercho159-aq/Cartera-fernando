@@ -243,12 +243,25 @@ export function AddTransactionSheet({ open, onOpenChange }: AddTransactionSheetP
 
     const getDisplayEmoji = (cat: any) => {
         if (!cat) return "📦";
-        // If the icon is already an emoji (simple check)
-        if (cat.icon && (/\p{Emoji}/u.test(cat.icon) || cat.icon.length <= 2)) {
+
+        // Check if icon exists and is a mapped Lucide icon
+        if (cat.icon && iconToEmoji[cat.icon]) {
+            return iconToEmoji[cat.icon];
+        }
+
+        // Check if map has entry by category name
+        if (cat.name && iconToEmoji[cat.name]) {
+            return iconToEmoji[cat.name];
+        }
+
+        // Check if icon is effectively an emoji (short length and non-alphanumeric start usually denotes emoji/symbol)
+        // Using a simpler heuristic: if it's short and NOT in our known lucide list names (which are usually CamelCase or kebab-case)
+        if (cat.icon && cat.icon.length <= 4 && !/^[a-zA-Z0-9]+$/.test(cat.icon)) {
             return cat.icon;
         }
-        // Fallback to mapped
-        return iconToEmoji[cat.icon] || iconToEmoji[cat.name] || "📦";
+
+        // Final fallback
+        return "📦";
     };
 
     return (
