@@ -45,6 +45,18 @@ export const accountMembers = pgTable('account_members', {
   joinedAt: timestamp('joined_at').notNull().defaultNow(),
 });
 
+// Custom Categories table (created to allow users to add their own categories)
+export const customCategories = pgTable('custom_categories', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id').references(() => users.id, { onDelete: 'cascade' }), // NULL = default system category
+  name: varchar('name', { length: 50 }).notNull(), // internal identifier (e.g. "gym")
+  label: varchar('label', { length: 50 }).notNull(), // display name (e.g. "Gimnasio")
+  icon: varchar('icon', { length: 50 }), // lucide icon name
+  color: varchar('color', { length: 20 }), // hex color
+  type: transactionTypeEnum('type').notNull().default('expense'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
 // Transactions table
 export const transactions = pgTable('transactions', {
   id: serial('id').primaryKey(),
@@ -53,7 +65,7 @@ export const transactions = pgTable('transactions', {
   amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
   title: varchar('title', { length: 255 }).notNull(),
   type: transactionTypeEnum('type').notNull(),
-  category: categoryEnum('category').notNull().default('other'),
+  category: varchar('category', { length: 100 }).notNull().default('other'), // Changed from enum to varchar to allow custom categories
   isRecurring: boolean('is_recurring').notNull().default(false),
   recurrencePeriod: recurrencePeriodEnum('recurrence_period').notNull().default('none'),
   date: timestamp('date').notNull().defaultNow(),
@@ -149,3 +161,5 @@ export type IncomeSource = typeof incomeSources.$inferSelect;
 export type NewIncomeSource = typeof incomeSources.$inferInsert;
 export type CommissionRecord = typeof commissionRecords.$inferSelect;
 export type NewCommissionRecord = typeof commissionRecords.$inferInsert;
+export type CustomCategory = typeof customCategories.$inferSelect;
+export type NewCustomCategory = typeof customCategories.$inferInsert;

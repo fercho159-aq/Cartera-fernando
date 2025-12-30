@@ -231,12 +231,20 @@ export default function ForecastPage() {
                                         )}
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <button
-                                            className="p-2 rounded-full hover:bg-muted transition-colors"
-                                            disabled={deletingId === source.id}
+                                        <IncomeSourcesSheet
+                                            sourceToEdit={source}
+                                            onSuccess={() => {
+                                                fetchIncomeSources(activeAccountId);
+                                                fetchForecast(activeAccountId);
+                                            }}
                                         >
-                                            <Edit2 className="w-4 h-4 text-muted-foreground" />
-                                        </button>
+                                            <button
+                                                className="p-2 rounded-full hover:bg-muted transition-colors"
+                                                disabled={deletingId === source.id}
+                                            >
+                                                <Edit2 className="w-4 h-4 text-muted-foreground" />
+                                            </button>
+                                        </IncomeSourcesSheet>
                                         <button
                                             onClick={() => handleDeleteSource(source.id)}
                                             className="p-2 rounded-full hover:bg-destructive/10 transition-colors"

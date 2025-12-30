@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     Sheet,
     SheetContent,
@@ -24,13 +25,15 @@ import { DollarSign, Plus, Loader2 } from "lucide-react";
 import { useIncomeStore } from "@/lib/income-store";
 import { useAccountStore } from "@/lib/account-store";
 import { cn } from "@/lib/utils";
+import { IncomeSource } from "@/lib/db/schema";
 
 interface IncomeSourcesSheetProps {
     children?: React.ReactNode;
     onSuccess?: () => void;
+    sourceToEdit?: IncomeSource;
 }
 
-export function IncomeSourcesSheet({ children, onSuccess }: IncomeSourcesSheetProps) {
+export function IncomeSourcesSheet({ children, onSuccess, sourceToEdit }: IncomeSourcesSheetProps) {
     const [open, setOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -47,6 +50,30 @@ export function IncomeSourcesSheet({ children, onSuccess }: IncomeSourcesSheetPr
     const [minExpected, setMinExpected] = useState("");
     const [maxExpected, setMaxExpected] = useState("");
     const [includeInForecast, setIncludeInForecast] = useState(true);
+
+    // Cargar datos al abrir si es edición
+    useEffect(() => {
+        if (open) {
+            if (sourceToEdit) {
+                setName(sourceToEdit.name);
+                setType(sourceToEdit.type as "fixed" | "variable");
+                setBaseAmount(sourceToEdit.baseAmount.toString());
+                setFrequency(sourceToEdit.frequency as any);
+                setIncludeInForecast(sourceToEdit.includeInForecast ?? true);
+
+                if (sourceToEdit.minExpected) setMinExpected(sourceToEdit.minExpected.toString());
+                if (sourceToEdit.maxExpected) setMaxExpected(sourceToEdit.maxExpected.toString());
+
+                // Parsear días de pago
+                if (sourceToEdit.payDays && sourceToEdit.payDays.length > 0) {
+                    if (sourceToEdit.payDays[0]) setPayDay1(sourceToEdit.payDays[0].toString());
+                    if (sourceToEdit.payDays[1]) setPayDay2(sourceToEdit.payDays[1].toString());
+                }
+            } else {
+                resetForm();
+            }
+        }
+    }, [open, sourceToEdit]);
 
     const resetForm = () => {
         setName("");
@@ -78,8 +105,14 @@ export function IncomeSourcesSheet({ children, onSuccess }: IncomeSourcesSheetPr
                 payDays.push(7, 14, 21, 28);
             }
 
-            const response = await fetch("/api/income-sources", {
-                method: "POST",
+            const url = sourceToEdit
+                ? `/api/income-sources/${sourceToEdit.id}`
+                : "/api/income-sources";
+
+            const method = sourceToEdit ? "PUT" : "POST";
+
+            const response = await fetch(url, {
+                method,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     name,
@@ -95,14 +128,14 @@ export function IncomeSourcesSheet({ children, onSuccess }: IncomeSourcesSheetPr
             });
 
             if (!response.ok) {
-                throw new Error("Error al crear fuente de ingreso");
+                throw new Error("Error al guardar fuente de ingreso");
             }
 
             // Refrescar datos
             await fetchIncomeSources(activeAccountId);
             await fetchForecast(activeAccountId);
 
-            resetForm();
+            if (!sourceToEdit) resetForm(); // Solo resetear si es nuevo, si es edit se cierra y ya
             setOpen(false);
             onSuccess?.();
         } catch (error) {
@@ -126,7 +159,7 @@ export function IncomeSourcesSheet({ children, onSuccess }: IncomeSourcesSheetPr
                 <SheetHeader className="mb-6">
                     <SheetTitle className="flex items-center gap-2 text-xl">
                         <DollarSign className="w-6 h-6 text-chart-1" />
-                        Configurar Fuente de Ingreso
+                        {sourceToEdit ? "Editar Fuente de Ingreso" : "Configurar Fuente de Ingreso"}
                     </SheetTitle>
                     <SheetDescription>
                         Configura tu salario, comisiones u otras fuentes de ingreso
@@ -334,7 +367,7 @@ export function IncomeSourcesSheet({ children, onSuccess }: IncomeSourcesSheetPr
                         {isSubmitting ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
-                            "Guardar Fuente de Ingreso"
+                            sourceToEdit ? "Actualizar Ingreso" : "Guardar Fuente de Ingreso"
                         )}
                     </Button>
                 </form>

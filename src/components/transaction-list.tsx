@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Transaction } from "@/lib/db/schema";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,7 +18,8 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useTransactionStore } from "@/lib/store";
 
-const categoryEmojis: Record<string, string> = {
+// Mapas de respaldo estáticos
+const defaultCategoryEmojis: Record<string, string> = {
     food: "🍔",
     transport: "🚗",
     entertainment: "🎮",
@@ -30,7 +32,7 @@ const categoryEmojis: Record<string, string> = {
     other: "📦",
 };
 
-const categoryLabels: Record<string, string> = {
+const defaultCategoryLabels: Record<string, string> = {
     food: "Comida",
     transport: "Transporte",
     entertainment: "Entretenimiento",
@@ -43,16 +45,34 @@ const categoryLabels: Record<string, string> = {
     other: "Otro",
 };
 
+const iconToEmoji: Record<string, string> = {
+    "food": "🍔", "Utensils": "🍔",
+    "transport": "🚗", "Car": "🚗",
+    "entertainment": "🎮", "Gamepad2": "🎮",
+    "health": "🏥", "HeartPulse": "🏥",
+    "shopping": "🛍️", "ShoppingBag": "🛍️",
+    "utilities": "💡", "Zap": "💡",
+    "salary": "💰", "Banknote": "💰",
+    "freelance": "💻", "Laptop": "💻",
+    "investment": "📈", "TrendingUp": "📈",
+    "other": "📦", "Box": "📦",
+    "housing": "🏠", "Home": "🏠",
+    "education": "🎓", "GraduationCap": "🎓"
+};
+
 interface TransactionItemProps {
     transaction: Transaction;
     onDelete?: (id: number) => void;
     isDeleting?: boolean;
+    categoryInfo?: { label: string; emoji: string };
 }
 
-export function TransactionItem({ transaction, onDelete, isDeleting }: TransactionItemProps) {
+export function TransactionItem({ transaction, onDelete, isDeleting, categoryInfo }: TransactionItemProps) {
     const isIncome = transaction.type === "income";
-    const emoji = categoryEmojis[transaction.category] || "📦";
-    const categoryLabel = categoryLabels[transaction.category] || transaction.category;
+
+    // Usar info pasada o defaults
+    const emoji = categoryInfo?.emoji || defaultCategoryEmojis[transaction.category] || "📦";
+    const categoryLabel = categoryInfo?.label || defaultCategoryLabels[transaction.category] || transaction.category;
 
     return (
         <div
@@ -143,6 +163,42 @@ export function TransactionList({ transactions, limit, showDeleteButton = true }
         transaction: null,
     });
 
+    // Categories state for dynamic display
+    const [categories, setCategories] = useState<any[]>([]);
+
+    useEffect(() => {
+        // Fetch categories to get labels and icons/emojis
+        fetch("/api/categories")
+            .then(res => {
+                if (res.ok) return res.json();
+                return [];
+            })
+            .then(data => {
+                if (Array.isArray(data)) setCategories(data);
+            })
+            .catch(err => console.error("Error fetching categories:", err));
+    }, []);
+
+    const getCategoryDetails = (catName: string): { label: string; emoji: string } => {
+        const cat = categories.find(c => c.name === catName);
+        if (cat) {
+            let emoji = "📦";
+            // Check if icon is effectively an emoji (length check is heuristic but effective for single emojis)
+            // or if it matches our icon map
+            if (cat.icon && (/\p{Emoji}/u.test(cat.icon) || cat.icon.length <= 2)) {
+                emoji = cat.icon;
+            } else {
+                emoji = iconToEmoji[cat.icon] || iconToEmoji[cat.name] || defaultCategoryEmojis[catName] || "📦";
+            }
+            return { label: cat.label, emoji };
+        }
+        // Fallback
+        return {
+            label: defaultCategoryLabels[catName] || catName,
+            emoji: defaultCategoryEmojis[catName] || "📦"
+        };
+    };
+
     const displayTransactions = limit
         ? transactions.slice(0, limit)
         : transactions;
@@ -224,6 +280,7 @@ export function TransactionList({ transactions, limit, showDeleteButton = true }
                                         transaction={transaction}
                                         onDelete={showDeleteButton ? () => handleDeleteClick(transaction) : undefined}
                                         isDeleting={deletingId === transaction.id}
+                                        categoryInfo={getCategoryDetails(transaction.category)}
                                     />
                                 ))}
                             </div>
