@@ -41,23 +41,39 @@ const Sheet = ({ open: controlledOpen, onOpenChange, children }: SheetProps) => 
   )
 }
 
-const SheetTrigger = React.forwardRef<
-  HTMLButtonElement,
-  React.ButtonHTMLAttributes<HTMLButtonElement>
->(({ onClick, ...props }, ref) => {
-  const { onOpenChange } = useSheetContext()
+interface SheetTriggerProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  asChild?: boolean
+}
 
-  return (
-    <button
-      ref={ref}
-      onClick={(e) => {
-        onOpenChange(true)
-        onClick?.(e)
-      }}
-      {...props}
-    />
-  )
-})
+const SheetTrigger = React.forwardRef<HTMLButtonElement, SheetTriggerProps>(
+  ({ onClick, asChild = false, ...props }, ref) => {
+    const { onOpenChange } = useSheetContext()
+
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      onOpenChange(true)
+      onClick?.(e)
+    }
+
+    // If asChild is true and there's a single child, clone it with our props
+    if (asChild && React.Children.count(props.children) === 1) {
+      const child = React.Children.only(props.children) as React.ReactElement
+      return React.cloneElement(child, {
+        ...child.props,
+        ...props,
+        onClick: handleClick,
+        ref,
+      })
+    }
+
+    return (
+      <button
+        ref={ref}
+        onClick={handleClick}
+        {...props}
+      />
+    )
+  }
+)
 SheetTrigger.displayName = "SheetTrigger"
 
 const SheetPortal = ({ children }: { children: React.ReactNode }) => {

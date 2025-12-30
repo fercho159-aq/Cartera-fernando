@@ -239,7 +239,7 @@ export function IncomeSourcesSheet({ children, onSuccess }: IncomeSourcesSheetPr
                     {/* Frecuencia */}
                     <div className="space-y-2">
                         <Label>Frecuencia de pago</Label>
-                        <Select value={frequency} onValueChange={(value: typeof frequency) => setFrequency(value)}>
+                        <Select value={frequency} onValueChange={(value) => setFrequency(value as typeof frequency)}>
                             <SelectTrigger>
                                 <SelectValue />
                             </SelectTrigger>
