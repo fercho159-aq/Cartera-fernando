@@ -241,7 +241,12 @@ export function IncomeSourcesSheet({ children, onSuccess }: IncomeSourcesSheetPr
                         <Label>Frecuencia de pago</Label>
                         <Select value={frequency} onValueChange={(value) => setFrequency(value as typeof frequency)}>
                             <SelectTrigger>
-                                <SelectValue />
+                                <SelectValue>
+                                    {frequency === 'weekly' && 'Semanal'}
+                                    {frequency === 'biweekly' && 'Quincenal'}
+                                    {frequency === 'monthly' && 'Mensual'}
+                                    {frequency === 'custom' && 'Personalizado'}
+                                </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="weekly">Semanal</SelectItem>
