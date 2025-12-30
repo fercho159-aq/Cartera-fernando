@@ -30,6 +30,7 @@ interface ForecastData {
     currentBalance: number;
     avgMonthlyExpense: number;
     avgDailyExpense: number;
+    expenseBreakdown: Array<{ category: string; amount: number }>;
     smartDailyBudget: number;
     daysUntilNextPay: number;
     nextPayday: NextPayday | null;

@@ -93,6 +93,23 @@ export async function GET(request: NextRequest) {
             ? Number(expenseResult.total) / Number(expenseResult.count)
             : 0;
 
+        // Calcular desglose de gastos por categoría
+        const categoryExpenses = await db
+            .select({
+                category: transactions.category,
+                total: sql<number>`SUM(${transactions.amount}::numeric)`
+            })
+            .from(transactions)
+            .where(expenseQuery)
+            .groupBy(transactions.category);
+
+        const expenseBreakdown = categoryExpenses.map(cat => ({
+            category: cat.category,
+            amount: expenseResult.count > 0
+                ? Number(cat.total) / Number(expenseResult.count)
+                : 0
+        })).sort((a, b) => b.amount - a.amount);
+
         // Obtener balance actual
         const balanceQuery = accountId
             ? and(
@@ -298,6 +315,7 @@ export async function GET(request: NextRequest) {
             currentBalance,
             avgMonthlyExpense,
             avgDailyExpense: avgMonthlyExpense / 30,
+            expenseBreakdown,
             smartDailyBudget,
             daysUntilNextPay,
             nextPayday,

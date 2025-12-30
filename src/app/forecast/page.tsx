@@ -69,6 +69,21 @@ export default function ForecastPage() {
         custom: "Personalizado"
     };
 
+    const categoryLabels: Record<string, string> = {
+        food: "Comida",
+        transport: "Transporte",
+        entertainment: "Entretenimiento",
+        health: "Salud",
+        shopping: "Compras",
+        utilities: "Servicios",
+        education: "Educación",
+        housing: "Vivienda",
+        salary: "Salario",
+        freelance: "Freelance",
+        investment: "Inversión",
+        other: "Otros"
+    };
+
     if (isLoading && !forecast) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -321,6 +336,30 @@ export default function ForecastPage() {
                                                     </p>
                                                 </div>
                                             </div>
+
+                                            {/* Desglose de Gastos Estimados */}
+                                            {forecast.expenseBreakdown && forecast.expenseBreakdown.length > 0 && (
+                                                <div className="mb-4 pt-1">
+                                                    <div className="bg-destructive/5 rounded-xl p-3 border border-destructive/10">
+                                                        <p className="text-xs font-medium text-destructive mb-2 flex items-center gap-2">
+                                                            <TrendingDown className="w-3 h-3" />
+                                                            Estimación por categoría
+                                                        </p>
+                                                        <div className="space-y-1.5">
+                                                            {forecast.expenseBreakdown.map((item, idx) => (
+                                                                <div key={idx} className="flex justify-between items-center text-xs">
+                                                                    <span className="text-muted-foreground capitalize">
+                                                                        {categoryLabels[item.category] || item.category}
+                                                                    </span>
+                                                                    <span className="text-destructive font-medium">
+                                                                        -{formatCurrency(item.amount)}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
 
                                             {/* Días de pago */}
                                             {month.paydays.length > 0 && (
