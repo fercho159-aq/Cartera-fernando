@@ -29,13 +29,15 @@ export function SmartBudgetCard({ balance, income, expenses }: SmartBudgetCardPr
 
     // Usar datos del forecast si están disponibles
     const hasIncomeSources = forecast && forecast.incomeSources.length > 0;
-    const smartDailyBudget = hasIncomeSources
-        ? forecast.smartDailyBudget
-        : balance > 0 ? balance / daysRemainingInMonth : 0;
 
+    // Calcular días hasta el próximo pago
     const daysUntilNextPay = hasIncomeSources
         ? forecast.daysUntilNextPay
         : daysRemainingInMonth;
+
+    // Siempre usar el balance real pasado como prop (de las transacciones del mes actual)
+    // y dividir entre días hasta el próximo pago para calcular el presupuesto diario
+    const smartDailyBudget = balance > 0 ? balance / daysUntilNextPay : 0;
 
     // Calcular promedio de gasto diario actual
     const daysPassed = today.getDate();
