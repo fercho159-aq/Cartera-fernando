@@ -41,12 +41,17 @@ export function SmartBudgetCard({ balance, income, expenses }: SmartBudgetCardPr
 
     // Calcular promedio de gasto diario actual
     const daysPassed = today.getDate();
-    const averageDailySpending = daysPassed > 0 ? expenses / daysPassed : 0;
+    // Si estamos en los primeros días del mes sin gastos, usar el promedio histórico del forecast
+    const historicalDailyAvg = forecast?.avgDailyExpense || 0;
+    const currentMonthDailyAvg = daysPassed > 0 && expenses > 0 ? expenses / daysPassed : 0;
+    const averageDailySpending = currentMonthDailyAvg > 0 ? currentMonthDailyAvg : historicalDailyAvg;
 
     // Determinar el estado del presupuesto
-    const isHealthy = smartDailyBudget > averageDailySpending;
-    const isWarning = smartDailyBudget > 0 && smartDailyBudget < averageDailySpending * 1.2;
-    const isCritical = balance <= 0 || smartDailyBudget < averageDailySpending * 0.8;
+    // Si es inicio de mes sin gastos aún, asumimos estado saludable si hay balance
+    const hasNoExpensesYet = expenses === 0 && daysPassed <= 3;
+    const isHealthy = smartDailyBudget > averageDailySpending || (hasNoExpensesYet && balance > 0);
+    const isWarning = !hasNoExpensesYet && smartDailyBudget > 0 && smartDailyBudget < averageDailySpending * 1.2;
+    const isCritical = balance <= 0 || (!hasNoExpensesYet && smartDailyBudget > 0 && smartDailyBudget < averageDailySpending * 0.8);
 
     // Formato de moneda
     const formatCurrency = (amount: number) => {

@@ -48,12 +48,16 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
         const currentMonth = now.getMonth();
         const currentYear = now.getFullYear();
 
+        console.log('🔍 getMonthlyStats - Total transacciones en store:', transactions.length);
+
+        // Filtrar transacciones del mes actual para ingresos/gastos mensuales
         const monthlyTransactions = transactions.filter((t) => {
             const date = new Date(t.date);
             return date.getMonth() === currentMonth &&
                 date.getFullYear() === currentYear;
         });
 
+        // Ingresos y gastos del MES ACTUAL
         const income = monthlyTransactions
             .filter((t) => t.type === 'income')
             .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -62,10 +66,31 @@ export const useTransactionStore = create<TransactionStore>((set, get) => ({
             .filter((t) => t.type === 'expense')
             .reduce((sum, t) => sum + Number(t.amount), 0);
 
-        return {
-            balance: income - expenses,
+        // Balance TOTAL HISTÓRICO (todas las transacciones de todos los tiempos)
+        const totalIncome = transactions
+            .filter((t) => t.type === 'income')
+            .reduce((sum, t) => sum + Number(t.amount), 0);
+
+        const totalExpenses = transactions
+            .filter((t) => t.type === 'expense')
+            .reduce((sum, t) => sum + Number(t.amount), 0);
+
+        const totalBalance = totalIncome - totalExpenses;
+
+        console.log('📊 Stats calculados:', {
+            totalTransactions: transactions.length,
+            monthlyTransactions: monthlyTransactions.length,
+            totalIncome,
+            totalExpenses,
+            totalBalance,
             income,
-            expenses,
+            expenses
+        });
+
+        return {
+            balance: totalBalance,  // Balance acumulado histórico
+            income,                 // Ingresos del mes actual
+            expenses,               // Gastos del mes actual
         };
     },
 }));

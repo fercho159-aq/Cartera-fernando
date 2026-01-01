@@ -43,6 +43,7 @@ export function Dashboard() {
 
             if (transactionsRes.ok) {
                 const transactionsData = await transactionsRes.json();
+                console.log('📥 Transacciones recibidas del API:', transactionsData.length, transactionsData);
                 setTransactions(transactionsData);
             }
 
